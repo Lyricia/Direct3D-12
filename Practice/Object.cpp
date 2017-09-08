@@ -35,6 +35,22 @@ void CGameObject::SetShader(CShader *pShader)
 	if (m_pShader) m_pShader->AddRef();
 }
 
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+{
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//객체의 월드 변환 행렬을 루트 상수(32-비트 값)를 통하여 셰이더 변수(상수 버퍼)로 복사한다.
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+}
+
+void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+{
+}
+
+void CGameObject::ReleaseShaderVariables()
+{
+}
+
 void CGameObject::Animate(float fTimeElapsed)
 {
 }
@@ -43,9 +59,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 {
 	OnPrepareRender();
 
+	UpdateShaderVariables(pd3dCommandList);
+
 	if (m_pShader)
 	{
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 

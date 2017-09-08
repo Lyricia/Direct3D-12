@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Scene.h"
-#include "Shader.h"
 
 CScene::CScene()
 {
@@ -17,41 +16,29 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
-	CTriangleMeshDiffused *pMesh = new CTriangleMeshDiffused(pd3dDevice, pd3dCommandList);
-
-	m_nObjects = 1;
-	m_ppObjects = new CGameObject*[m_nObjects];
-
-	CRotatingObject *pRotatingObject = new CRotatingObject();
-	pRotatingObject->SetMesh(pMesh);
-
-	CDiffusedShader *pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	pRotatingObject->SetShader(pShader);
-
-	m_ppObjects[0] = pRotatingObject;
+	m_nShaders = 1;
+	m_pShaders = new CObjectsShader[m_nShaders];
+	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
 void CScene::ReleaseObjects()
 {
-	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dGraphicsRootSignature)
+		m_pd3dGraphicsRootSignature->Release();
 
-	if (m_ppObjects)
+	for (int i = 0; i < m_nShaders; i++)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
-		delete[] m_ppObjects;
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
 	}
+	if (m_pShaders) delete[] m_pShaders;
 }
 
 void CScene::ReleaseUploadBuffers()
 {
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
-	}
+	for (int i = 0; i < m_nShaders; i++)
+		m_pShaders[i].ReleaseUploadBuffers();
 }
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
@@ -106,9 +93,9 @@ bool CScene::ProcessInput()
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_ppObjects[j]->Animate(fTimeElapsed);
+		m_pShaders[i].AnimateObjects(fTimeElapsed);
 	}
 }
 
@@ -117,10 +104,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
-
-	for (int j = 0; j < m_nObjects; j++)
+	for (int i = 0; i < m_nShaders; i++)
 	{
-		if (m_ppObjects[j]) m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		m_pShaders[i].Render(pd3dCommandList, pCamera);
 	}
 }
-

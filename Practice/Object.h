@@ -31,6 +31,13 @@ public:
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
 
+	//상수 버퍼를 생성한다.
+	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+
+	//상수 버퍼의 내용을 갱신한다.
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);

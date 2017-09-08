@@ -52,11 +52,25 @@ protected:
 
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferView;
 
+	// 인덱스 버퍼(인덱스의 배열)와 인덱스 버퍼를 위한 업로드 버퍼에 대한 인터페이스 포인터이다.
+	// 인덱스 버퍼는 정점 버퍼(배열)에 대한 인덱스를 가진다.
+	ID3D12Resource					*m_pd3dIndexBuffer = NULL; 
+	ID3D12Resource					*m_pd3dIndexUploadBuffer = NULL;
+
+	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
+
 	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT							m_nSlot = 0;
 	UINT							m_nVertices = 0;
 	UINT							m_nStride = 0;
 	UINT							m_nOffset = 0;
+
+	// 인덱스 버퍼에 포함되는 인덱스의 개수이다. 
+	UINT							m_nIndices = 0;
+	//인덱스 버퍼에서 메쉬를 그리기 위해 사용되는 시작 인덱스이다. 
+	UINT							m_nStartIndex = 0; 
+	//인덱스 버퍼의 인덱스에 더해질 인덱스이다. 
+	int								m_nBaseVertex = 0; 
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
@@ -85,4 +99,20 @@ public:
 		float fDepth = 2.0f
 	);
 	virtual ~CCubeMeshDiffused();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CAirplaneMeshDiffused : public CMesh
+{
+public:
+	CAirplaneMeshDiffused(
+		ID3D12Device *pd3dDevice, 
+		ID3D12GraphicsCommandList *pd3dCommandList, 
+		float fWidth = 20.0f,
+		float fHeight = 20.0f, 
+		float fDepth = 4.0f,
+		XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f)
+	);
+	virtual ~CAirplaneMeshDiffused();
 };

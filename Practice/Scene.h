@@ -6,6 +6,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Shader.h"
 
 class CScene
 {
@@ -29,8 +30,11 @@ public:
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 protected:
-	CGameObject					**m_ppObjects = 0;
-	int							m_nObjects = 0;
+	//CGameObject					**m_ppObjects = 0;
+	//int							m_nObjects = 0;
+
+	CObjectsShader				 *m_pShaders = NULL;
+	int							m_nShaders = 0;
 
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 };
