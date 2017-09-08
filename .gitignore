@@ -1,0 +1,9 @@
+*.db
+*.ipch
+*.lastbuildstate
+*.obj
+*.tlog
+*.suo
+*.exe
+Practice/Release/LabProject03-3.log
+*.ilk
