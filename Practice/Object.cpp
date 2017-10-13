@@ -69,6 +69,21 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 }
 
+void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances)
+{
+	OnPrepareRender();
+
+	//UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, nInstances);
+}
+
+void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+{
+	OnPrepareRender();
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, nInstances, d3dInstancingBufferView);
+}
+
 void CGameObject::ReleaseUploadBuffers()
 {
 	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
@@ -142,11 +157,13 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CRotatingObject::CRotatingObject()
 {
-	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3RotationAxis = XMFLOAT3(.0f, .0f, .0f);
 	m_fRotationSpeed = 90.0f;
 }
 
@@ -168,7 +185,7 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 //
 CRevolvingObject::CRevolvingObject()
 {
-	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 1.0f, 0.0f);
 	m_fRevolutionSpeed = 0.0f;
 }
 

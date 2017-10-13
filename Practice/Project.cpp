@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "LabProject03-3.h"
+#include "Project.h"
 #include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
@@ -27,12 +27,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	HACCEL hAccelTable;
 
 	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_LABPROJECT033, szWindowClass, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_PROJECT, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT033));
+	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PROJECT));
 
 	while (1)
 	{
@@ -66,10 +66,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT033));
+	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PROJECT));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT033);
+	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_PROJECT);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 

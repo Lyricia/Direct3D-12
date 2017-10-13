@@ -7,3 +7,10 @@
 *.exe
 Practice/Release/LabProject03-3.log
 *.ilk
+*.log
+*.pch
+*.pdb
+*.res
+*.idb
+*.iobj
+*.ipdb
