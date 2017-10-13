@@ -29,12 +29,16 @@ public:
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
+	CHeightMapTerrain *GetTerrain() { return(m_pTerrain); }
+
 protected:
 	//CGameObject					**m_ppObjects = 0;
 	//int							m_nObjects = 0;
 
-	//CObjectsShader				*m_pShaders = NULL;
-	CInstancingShader			*m_pShaders = NULL;
+	CHeightMapTerrain			*m_pTerrain = NULL;
+
+	CObjectsShader				*m_pShaders = NULL;
+	CInstancingShader			*m_pInstanceShaders = NULL;
 	int							m_nShaders = 0;
 
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
