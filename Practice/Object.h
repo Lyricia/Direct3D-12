@@ -96,12 +96,21 @@ public:
 private:
 	XMFLOAT3					m_xmf3RevolutionAxis;
 	float						m_fRevolutionSpeed;
+	
+	float						m_OrbitRaidus;
+	float						m_OrbitAngle;
+	XMFLOAT3					m_OrbitPos;
+
+	XMFLOAT3					m_CenterPos;
 
 public:
 	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
 	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
 
+	void SetRadius(float radius) { m_OrbitRaidus = radius; }
+
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

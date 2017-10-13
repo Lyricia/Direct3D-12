@@ -225,8 +225,10 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 //
 CRevolvingObject::CRevolvingObject()
 {
-	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 1.0f, 0.0f);
-	m_fRevolutionSpeed = 0.0f;
+	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_fRevolutionSpeed = 45.f;
+	m_OrbitRaidus = 512.f;
+	m_CenterPos = XMFLOAT3(512.f, 0.f, 512.f);
 }
 
 CRevolvingObject::~CRevolvingObject()
@@ -235,8 +237,23 @@ CRevolvingObject::~CRevolvingObject()
 
 void CRevolvingObject::Animate(float fTimeElapsed)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
-	m_xmf4x4World = Matrix4x4::Multiply(m_xmf4x4World, mtxRotate);
+	/*
+	공전하는 행성을 맵의 중심으로 옮긴다.
+	해당 행성이 얼마나 돌았는지 각도를 speed와 Time elapsed를 통해서 구하고
+	행성에 주어진 Radius에 따라서 공전좌표를 구한다.
+	중심좌표에 공전좌표를 더하여 SetPostion한다.
+	*/
+
+	m_OrbitAngle += XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed);
+	if (m_OrbitAngle > 6.24) m_OrbitAngle -= 6.24;
+
+	m_OrbitPos = XMFLOAT3(cos(m_OrbitAngle)*m_OrbitRaidus, sin(m_OrbitAngle)*m_OrbitRaidus, 0.f);
+	SetPosition(Vector3::Add(m_CenterPos, m_OrbitPos));
+}
+
+void CRevolvingObject::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

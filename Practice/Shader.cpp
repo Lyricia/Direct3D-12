@@ -469,30 +469,21 @@ void CInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList	*pd3dCom
 
 void CInstancingShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	int xObjects = 10, yObjects = 2, zObjects = 10, i = 0;
-	m_nObjects = (xObjects * 2 + 1) * (yObjects) * (zObjects * 2 + 1);
+	int i = 0;
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	float fxPitch = 12.0f * 2.5f;
-	float fyPitch = 12.0f * 2.5f;
-	float fzPitch = 12.0f * 2.5f;
-	CRotatingObject *pRotatingObject = NULL;
-	for (int x = -xObjects; x <= xObjects; x++)
+	CRevolvingObject *pRotatingObject = NULL;
+	for (int x = 1; x <= m_nObjects; x++)
 	{
-		for (int y = 1; y <= yObjects; y++)
-		{
-			for (int z = -zObjects; z <= zObjects; z++)
-			{
-				pRotatingObject = new CRotatingObject();
-				pRotatingObject->SetPosition(fxPitch*x, fyPitch*y, fzPitch*z);
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(10.0f*(i % 10));
-				m_ppObjects[i++] = pRotatingObject;
-			}
-		}
+		pRotatingObject = new CRevolvingObject();
+		pRotatingObject->SetRadius(-512.f + (1024.f*(x - 1)));
+		//pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		//pRotatingObject->SetRotationSpeed(10.0f*(i % 10));
+		m_ppObjects[i++] = pRotatingObject;
 	}
 
 	//인스턴싱을 사용하여 렌더링하기 위하여 하나의 게임 객체만 메쉬를 가진다.
-	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 	m_ppObjects[0]->SetMesh(0, pCubeMesh);
 
 	//인스턴싱을 위한 버퍼(Structured Buffer)를 생성한다.
