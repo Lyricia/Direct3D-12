@@ -6,7 +6,8 @@
 #include "Object.h"
 #include "Shader.h"
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CMaterial::CMaterial()
 {
 	m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -30,11 +31,10 @@ void CMaterial::SetShader(CShader *pShader)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-
-CGameObject::CGameObject(int nMeshes) : m_nMeshes(nMeshes)
+CGameObject::CGameObject(int nMeshes)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
-
+	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
 
 	if (m_nMeshes > 0)
@@ -56,29 +56,27 @@ CGameObject::~CGameObject()
 		delete[] m_ppMeshes;
 	}
 
-	if (m_pShader)
-	{
-		m_pShader->ReleaseShaderVariables();
-		m_pShader->Release();
-	}
+	if (m_pMaterial) m_pMaterial->Release();
 }
 
 void CGameObject::SetMesh(int nIndex, CMesh *pMesh)
 {
-	if (m_ppMeshes) 
+	if (m_ppMeshes)
 	{
 		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
 		m_ppMeshes[nIndex] = pMesh;
-
-		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->AddRef();
+		if (pMesh) pMesh->AddRef();
 	}
 }
 
 void CGameObject::SetShader(CShader *pShader)
 {
-	if (m_pShader) m_pShader->Release();
-	m_pShader = pShader;
-	if (m_pShader) m_pShader->AddRef();
+	if (!m_pMaterial)
+	{
+		m_pMaterial = new CMaterial();
+		m_pMaterial->AddRef();
+	}
+	if (m_pMaterial) m_pMaterial->SetShader(pShader);
 }
 
 void CGameObject::SetMaterial(CMaterial *pMaterial)
@@ -94,22 +92,6 @@ void CGameObject::SetMaterial(UINT nReflection)
 	m_pMaterial->m_nReflection = nReflection;
 }
 
-void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
-{
-	XMFLOAT4X4 xmf4x4World;
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	//객체의 월드 변환 행렬을 루트 상수(32-비트 값)를 통하여 셰이더 변수(상수 버퍼)로 복사한다.
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
-}
-
-void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
-{
-}
-
-void CGameObject::ReleaseShaderVariables()
-{
-}
-
 void CGameObject::Animate(float fTimeElapsed)
 {
 }
@@ -118,7 +100,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 {
 	OnPrepareRender();
 
-	//UpdateShaderVariables(pd3dCommandList);
 	if (m_pMaterial)
 	{
 		if (m_pMaterial->m_pShader)
@@ -128,15 +109,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		}
 	}
 
-	//if (m_pShader)
-	//{
-	//	m_pShader->Render(pd3dCommandList, pCamera);
-	//}
-
-	// 메시 렌더 전에 각 오브젝트에 있는 GPU 주소를 잡아준다.
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
-
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 
 	if (m_ppMeshes)
 	{
@@ -147,38 +120,14 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	}
 }
 
-void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances)
-{
-	OnPrepareRender();
-
-	UpdateShaderVariables(pd3dCommandList);
-
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, nInstances);
-	}
-}
-
-void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
-{
-	OnPrepareRender();
-
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, nInstances, d3dInstancingBufferView);
-	}
-}
-
 void CGameObject::ReleaseUploadBuffers()
 {
-	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
-
 	if (m_ppMeshes)
 	{
 		for (int i = 0; i < m_nMeshes; i++)
+		{
 			if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
+		}
 	}
 }
 
@@ -250,14 +199,12 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
-	m_xmf3RotationAxis = XMFLOAT3(.0f, .0f, .0f);
-	m_fRotationSpeed = 90.0f;
+	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fRotationSpeed = 15.0f;
 }
 
 CRotatingObject::~CRotatingObject()
@@ -276,12 +223,10 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CRevolvingObject::CRevolvingObject()
+CRevolvingObject::CRevolvingObject(int nMeshes) : CGameObject(nMeshes)
 {
-	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_fRevolutionSpeed = 45.f;
-	m_OrbitRaidus = 512.f;
-	m_CenterPos = XMFLOAT3(512.f, 0.f, 512.f);
+	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_fRevolutionSpeed = 0.0f;
 }
 
 CRevolvingObject::~CRevolvingObject()
@@ -290,32 +235,16 @@ CRevolvingObject::~CRevolvingObject()
 
 void CRevolvingObject::Animate(float fTimeElapsed)
 {
-	/*
-	공전하는 행성을 맵의 중심으로 옮긴다.
-	해당 행성이 얼마나 돌았는지 각도를 speed와 Time elapsed를 통해서 구하고
-	행성에 주어진 Radius에 따라서 공전좌표를 구한다.
-	중심좌표에 공전좌표를 더하여 SetPostion한다.
-	*/
-
-	m_OrbitAngle += XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed);
-	if (m_OrbitAngle > 6.24) m_OrbitAngle -= 6.24;
-
-	m_OrbitPos = XMFLOAT3(cos(m_OrbitAngle)*m_OrbitRaidus, sin(m_OrbitAngle)*m_OrbitRaidus, 0.f);
-	SetPosition(Vector3::Add(m_CenterPos, m_OrbitPos));
-}
-
-void CRevolvingObject::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
-{
-	CGameObject::Render(pd3dCommandList, pCamera);
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
+	m_xmf4x4World = Matrix4x4::Multiply(m_xmf4x4World, mtxRotate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
-CHeightMapTerrain::CHeightMapTerrain(
-	ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList	*pd3dCommandList, 
-	ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, 
-	int nWidth, int nLength, int nBlockWidth, int nBlockLength,
-	XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(0)
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, 
+	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color)
 {
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다.
 	m_nWidth = nWidth;
@@ -342,7 +271,6 @@ CHeightMapTerrain::CHeightMapTerrain(
 	//지형 전체를 표현하기 위한 격자 메쉬에 대한 포인터 배열을 생성한다.
 	m_ppMeshes = new CMesh*[m_nMeshes];
 	for (int i = 0; i < m_nMeshes; i++) m_ppMeshes[i] = NULL;
-
 	CHeightMapGridMesh *pHeightMapGridMesh = NULL;
 	for (int z = 0, zStart = 0; z < czBlocks; z++)
 	{
@@ -351,14 +279,12 @@ CHeightMapTerrain::CHeightMapTerrain(
 			//지형의 일부분을 나타내는 격자 메쉬의 시작 위치(좌표)이다.
 			xStart = x * (nBlockWidth - 1);
 			zStart = z * (nBlockLength - 1);
-
 			//지형의 일부분을 나타내는 격자 메쉬를 생성하여 지형 메쉬에 저장한다.
 			pHeightMapGridMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, xStart,
 				zStart, nBlockWidth, nBlockLength, xmf3Scale, xmf4Color, m_pHeightMapImage);
 			SetMesh(x + (z*cxBlocks), pHeightMapGridMesh);
 		}
 	}
-
 	//지형을 렌더링하기 위한 셰이더를 생성한다.
 	CTerrainShader *pShader = new CTerrainShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);

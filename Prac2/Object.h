@@ -16,6 +16,8 @@
 
 class CShader;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 struct MATERIAL
 {
 	XMFLOAT4						m_xmf4Ambient;
@@ -51,9 +53,19 @@ class CGameObject
 {
 public:
 	CGameObject(int nMeshes = 1);
-	virtual ~CGameObject();
+    virtual ~CGameObject();
 
 public:
+	XMFLOAT4X4						m_xmf4x4World;
+	//CMesh							*m_pMesh = NULL;
+	CMesh							**m_ppMeshes = NULL;
+	int								m_nMeshes = 0;
+
+	CShader							*m_pShader = NULL;
+	CMaterial						*m_pMaterial = NULL;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+
 	void SetMesh(int nIndex, CMesh *pMesh);
 	void SetShader(CShader *pShader);
 	void SetMaterial(CMaterial *pMaterial);
@@ -62,18 +74,11 @@ public:
 	void SetCbvGPUDescriptorHandle(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }
 
-	//상수 버퍼를 생성한다.
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-
-	//상수 버퍼의 내용을 갱신한다.
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseShaderVariables();
+	virtual void BuildMaterials(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender() { }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -88,33 +93,16 @@ public:
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
-	
+
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
-
-public:
-
-	XMFLOAT4X4						m_xmf4x4World;
-	CMesh							*m_pMesh = NULL;
-
-	CShader							*m_pShader = NULL;
-	CMaterial						*m_pMaterial = NULL;
-
-	//CMesh							*m_pMesh = NULL;
-	CMesh							**m_ppMeshes = NULL;
-	int								m_nMeshes = 0;
-
-	// Object가 아예 Desc의 주소를 아예 들고 있도록
-	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CRotatingObject : public CGameObject
 {
 public:
 	CRotatingObject(int nMeshes = 1);
-	virtual ~CRotatingObject();
+    virtual ~CRotatingObject();
 
 private:
 	XMFLOAT3					m_xmf3RotationAxis;
@@ -131,43 +119,29 @@ public:
 class CRevolvingObject : public CGameObject
 {
 public:
-	CRevolvingObject();
+	CRevolvingObject(int nMeshes = 1);
 	virtual ~CRevolvingObject();
 
 private:
 	XMFLOAT3					m_xmf3RevolutionAxis;
 	float						m_fRevolutionSpeed;
-	
-	float						m_OrbitRaidus;
-	float						m_OrbitAngle;
-	XMFLOAT3					m_OrbitPos;
-
-	XMFLOAT3					m_CenterPos;
 
 public:
 	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
 	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
 
-	void SetRadius(float radius) { m_OrbitRaidus = radius; }
-
 	virtual void Animate(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 class CHeightMapTerrain : public CGameObject
 {
 public:
-	CHeightMapTerrain(
-		ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList	*pd3dCommandList,
-		ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName,
-		int	nWidth, int nLength, int nBlockWidth, int nBlockLength,
-		XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color
-	);
-
+	CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+		*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, int
+		nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4
+		xmf4Color);
 	virtual ~CHeightMapTerrain();
+
 private:
 	//지형의 높이 맵으로 사용할 이미지이다.
 	CHeightMapImage *m_pHeightMapImage;
@@ -187,7 +161,8 @@ public:
 
 	//지형의 법선 벡터를 계산하는 함수이다(월드 좌표계). 높이 맵의 법선 벡터를 사용한다.
 	XMFLOAT3 GetNormal(float x, float z) {
-		return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z / m_xmf3Scale.z)));
+		return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z /
+			m_xmf3Scale.z)));
 	}
 
 	int GetHeightMapWidth() { return(m_pHeightMapImage->GetHeightMapWidth()); }
@@ -197,4 +172,5 @@ public:
 	//지형의 크기(가로/세로)를 반환한다. 높이 맵의 크기에 스케일을 곱한 값이다.
 	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
+
 };
