@@ -589,8 +589,7 @@ CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMF
 	{
 		for (int x = 0; x < m_nWidth; x++)
 		{
-			m_pHeightMapPixels[x + ((m_nLength - 1 - y)*m_nWidth)] = pHeightMapPixels[x +
-				(y*m_nWidth)];
+			m_pHeightMapPixels[x + ((m_nLength - 1 - y)*m_nWidth)] = pHeightMapPixels[x + (y*m_nWidth)];
 		}
 	}
 	if (pHeightMapPixels) delete[] pHeightMapPixels;
@@ -675,41 +674,52 @@ float CHeightMapImage::GetHeight(float fx, float fz)
 	return(fHeight);
 }
 
-CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
-	ID3D12GraphicsCommandList *pd3dCommandList, int xStart, int zStart, int nWidth, int
-	nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, void *pContext) : CMesh(pd3dDevice,
-		pd3dCommandList)
+CHeightMapGridMesh::CHeightMapGridMesh(
+	ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, 
+	int xStart, int zStart, int nWidth, int nLength, 
+	XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, void *pContext) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다.
 	m_nVertices = nWidth * nLength;
-	m_nStride = sizeof(CDiffusedVertex);
+	m_nStride = sizeof(CIlluminatedVertex);
+
 	//격자는 삼각형 스트립으로 구성한다.
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 	m_xmf3Scale = xmf3Scale;
-	CDiffusedVertex *pVertices = new CDiffusedVertex[m_nVertices];
+
+	//CDiffusedVertex *pVertices = new CDiffusedVertex[m_nVertices];
+
+	CIlluminatedVertex *pVertices = new CIlluminatedVertex[m_nVertices];
+
 	/*xStart와 zStart는 격자의 시작 위치(x-좌표와 z-좌표)를 나타낸다. 커다란 지형은 격자들의 이차원 배열로 만들 필
 	요가 있기 때문에 전체 지형에서 각 격자의 시작 위치를 나타내는 정보가 필요하다.*/
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	for (int i = 0, z = zStart; z < (zStart + nLength); z++) {
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
-			//정점의 높이와 색상을 높이 맵으로부터 구한다.
-			XMFLOAT3 xmf3Position = XMFLOAT3((x*m_xmf3Scale.x), OnGetHeight(x, z, pContext),
-				(z*m_xmf3Scale.z));
-			XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			pVertices[i] = CDiffusedVertex(xmf3Position, xmf3Color);
+			//정점의 높이와 색상을 높이 맵으로부터 구한다. (노말을 구하는 것으로 수정)
+
+			XMFLOAT3 xmf3Position = XMFLOAT3((x*m_xmf3Scale.x), OnGetHeight(x, z, pContext), (z*m_xmf3Scale.z));
+			XMFLOAT3 xmf3Normal = OnGetNormal(x, z, pContext);
+			//XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
+			pVertices[i] = CIlluminatedVertex(xmf3Position, xmf3Normal);
+
+			//pVertices[i] = CDiffusedVertex(xmf3Position, xmf3Color);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
 	}
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+	m_pd3dVertexBuffer = ::CreateBufferResource(
+		pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
 	delete[] pVertices;
 
 	m_nIndices = ((nWidth * 2)*(nLength - 1)) + ((nLength - 1) - 1);
@@ -741,9 +751,11 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
 			}
 		}
 	}
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
-		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
-		&m_pd3dIndexUploadBuffer);
+	m_pd3dIndexBuffer = ::CreateBufferResource(
+		pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, 
+		D3D12_RESOURCE_STATE_INDEX_BUFFER,	&m_pd3dIndexUploadBuffer);
+
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
@@ -785,4 +797,10 @@ XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void *pContext)
 	//fScale은 조명 색상(밝기)이 반사되는 비율이다.
 	XMFLOAT4 xmf4Color = Vector4::Multiply(fScale, xmf4IncidentLightColor);
 	return(xmf4Color);
+}
+
+XMFLOAT3 CHeightMapGridMesh::OnGetNormal(int x, int z, void * pContext)
+{
+	CHeightMapImage *pHeightMapImage = (CHeightMapImage *)pContext;
+	return pHeightMapImage->GetHeightMapNormal(x, z);
 }

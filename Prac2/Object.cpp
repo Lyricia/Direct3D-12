@@ -37,6 +37,8 @@ CGameObject::CGameObject(int nMeshes)
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
 
+	m_d3dCbvGPUDescriptorHandle.ptr = NULL;
+
 	if (m_nMeshes > 0)
 	{
 		m_ppMeshes = new CMesh*[m_nMeshes];
@@ -109,7 +111,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		}
 	}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	if(m_d3dCbvGPUDescriptorHandle.ptr)
+		pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
 
 	if (m_ppMeshes)
 	{
@@ -225,8 +228,10 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 //
 CRevolvingObject::CRevolvingObject(int nMeshes) : CGameObject(nMeshes)
 {
-	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_fRevolutionSpeed = 0.0f;
+	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_fRevolutionSpeed = 45.f;
+	m_OrbitRaidus = 512.f;
+	m_CenterPos = XMFLOAT3(256.f, 0.f, 256.f);
 }
 
 CRevolvingObject::~CRevolvingObject()
@@ -235,8 +240,23 @@ CRevolvingObject::~CRevolvingObject()
 
 void CRevolvingObject::Animate(float fTimeElapsed)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
-	m_xmf4x4World = Matrix4x4::Multiply(m_xmf4x4World, mtxRotate);
+	/*
+	공전하는 행성을 맵의 중심으로 옮긴다.
+	해당 행성이 얼마나 돌았는지 각도를 speed와 Time elapsed를 통해서 구하고
+	행성에 주어진 Radius에 따라서 공전좌표를 구한다.
+	중심좌표에 공전좌표를 더하여 SetPostion한다.
+	*/
+
+	m_OrbitAngle += XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed);
+	if (m_OrbitAngle > 6.24) m_OrbitAngle -= 6.24;
+
+	m_OrbitPos = XMFLOAT3(cos(m_OrbitAngle)*m_OrbitRaidus, sin(m_OrbitAngle)*m_OrbitRaidus, 0.f);
+	SetPosition(Vector3::Add(m_CenterPos, m_OrbitPos));
+}
+
+void CRevolvingObject::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,7 +269,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다.
 	m_nWidth = nWidth;
 	m_nLength = nLength;
-
+	
 	/*지형 객체는 격자 메쉬들의 배열로 만들 것이다. nBlockWidth, nBlockLength는 격자 메쉬 하나의 가로, 세로 크
 	기이다. cxQuadsPerBlock, czQuadsPerBlock은 격자 메쉬의 가로 방향과 세로 방향 사각형의 개수이다.*/
 	int cxQuadsPerBlock = nBlockWidth - 1;
@@ -285,10 +305,14 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 			SetMesh(x + (z*cxBlocks), pHeightMapGridMesh);
 		}
 	}
+
 	//지형을 렌더링하기 위한 셰이더를 생성한다.
 	CTerrainShader *pShader = new CTerrainShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->BuildObjects(pd3dDevice, pd3dCommandList, this);
 	SetShader(pShader);
+
+	SetCbvGPUDescriptorHandle(pShader->GetGPUDescriptorHandleForHeapStart().ptr);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)

@@ -412,35 +412,62 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
 
-	float fxPitch = 12.0f * 2.5f;
-	float fyPitch = 12.0f * 2.5f;
-	float fzPitch = 12.0f * 2.5f;
+	float fxPitch = 150.f;
+	float fyPitch = 150.f;
+	float fzPitch = 150.f;
 
-	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 2, zObjects = int(fTerrainLength / fzPitch), i = 0;
+	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch), i = 0;
+	//int xObjects = 5;
+	//int yObjects = 5;
+	//int zObjects = 5;
+	CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 10);
+	CSphereMeshIlluminated *pSphereMesh2 = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList,100);
+	//CCubeMeshIlluminated *pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 0.f, 0.f, 0.f);
 
-	CCubeMeshIlluminated *pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-
-	m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+	m_nObjects = (xObjects * 2) * (yObjects * 2) * (zObjects * 2)+2;
 
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);	
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvSrvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	
+	CRevolvingObject *pRevolvingObject = NULL;
+
+	float radius = 1024.f;
+
+	pRevolvingObject = new CRevolvingObject();
+	pRevolvingObject->SetMesh(0, pSphereMesh2);
+	pRevolvingObject->SetMaterial(1);
+	pRevolvingObject->SetRadius(-radius);
+	pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
+	pRevolvingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+	m_ppObjects[i++] = pRevolvingObject;
+	
+	pRevolvingObject = new CRevolvingObject();
+	pRevolvingObject->SetMesh(0, pSphereMesh2);
+	pRevolvingObject->SetMaterial(1);
+	pRevolvingObject->SetRadius(radius);
+	pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
+	pRevolvingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+	m_ppObjects[i++] = pRevolvingObject;
+
+
+	
+
 	CRotatingObject *pRotatingObject = NULL;
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	for (int x = -xObjects; x <= xObjects; x++)
+	for (int x = -xObjects; x < xObjects; x++)
 	{
-		for (int y = -yObjects; y <= yObjects; y++)
+		for (int y = -yObjects; y < yObjects; y++)
 		{
-			for (int z = -zObjects; z <= zObjects; z++)
+			for (int z = -zObjects; z < zObjects; z++)
 			{
 				float xPosition = x * fxPitch;
 				float zPosition = z * fzPitch;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 
 				pRotatingObject = new CRotatingObject(1);
-				pRotatingObject->SetMesh(0, pCubeMesh);
+				pRotatingObject->SetMesh(0, pSphereMesh);
 				pRotatingObject->SetMaterial(i % MAX_MATERIALS);
 				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
 				if (y == 0)
@@ -449,15 +476,19 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 					벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
 					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
 					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-
+				
 					if (Vector3::IsZero(xmf3RotateAxis))
 						xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
+				
 					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
 					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
 				}
 				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 				pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+
+				// 각 Object에 해당되는 Desc의 주소를 Object에 넘겨준다.
+				pRotatingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+
 				m_ppObjects[i++] = pRotatingObject;
 			}
 		}
@@ -494,6 +525,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	CShader::Render(pd3dCommandList, pCamera);
 
 	UpdateShaderVariables(pd3dCommandList);
+
 
 	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
@@ -546,4 +578,34 @@ void CTerrainShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature 
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+}
+
+void CTerrainShader::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, void * pContext)
+{
+	m_nObjects = 1;
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_ppObjects = new CGameObject*[1];
+	CHeightMapTerrain *pTerrain = (CHeightMapTerrain*)pContext;
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvSrvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pTerrain->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr);
+
+	m_ppObjects[0] = pTerrain;
+}
+
+void CTerrainShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+{
+	CShader::Render(pd3dCommandList, pCamera);
+
+	UpdateShaderVariables(pd3dCommandList);
+	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+}
+
+void CTerrainShader::UpdateShaderVariables(ID3D12GraphicsCommandList * pd3dCommandList)
+{
+	CB_GAMEOBJECT_INFO *pbMappedcbGameObject = (CB_GAMEOBJECT_INFO *)(m_pcbMappedGameObjects);
+
+	XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[0]->m_xmf4x4World)));
+
+	pbMappedcbGameObject->m_nMaterial = m_ppObjects[0]->m_pMaterial->m_nReflection;
 }

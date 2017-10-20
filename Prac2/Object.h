@@ -126,11 +126,22 @@ private:
 	XMFLOAT3					m_xmf3RevolutionAxis;
 	float						m_fRevolutionSpeed;
 
+	float						m_OrbitRaidus;
+	float						m_OrbitAngle = 0;
+	XMFLOAT3					m_OrbitPos;
+
+	XMFLOAT3					m_CenterPos;
+
 public:
 	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
 	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
 
+	void SetRadius(float radius) { m_OrbitRaidus = radius; }
+	void SetCenterPos(XMFLOAT3 pos) { m_CenterPos = pos; }
+
+
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
 
 class CHeightMapTerrain : public CGameObject
@@ -161,8 +172,7 @@ public:
 
 	//지형의 법선 벡터를 계산하는 함수이다(월드 좌표계). 높이 맵의 법선 벡터를 사용한다.
 	XMFLOAT3 GetNormal(float x, float z) {
-		return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z /
-			m_xmf3Scale.z)));
+		return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z / m_xmf3Scale.z)));
 	}
 
 	int GetHeightMapWidth() { return(m_pHeightMapImage->GetHeightMapWidth()); }
