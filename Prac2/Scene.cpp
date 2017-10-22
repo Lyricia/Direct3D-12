@@ -104,7 +104,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 void CScene::BuildTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다.
-	XMFLOAT3 xmf3Scale(4.0f, 0.5f, 4.0f);
+	XMFLOAT3 xmf3Scale(5.0f, 0.5f, 5.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
 	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다.
@@ -251,6 +251,10 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 {
+	if (::GetKeyboardState(pKeysBuffer))
+	{
+		if (pKeysBuffer['P'] & 0xF0) 		m_pPlayer->SetPosition(XMFLOAT3(400, 0, 400));
+	}
 	return(false);
 }
 

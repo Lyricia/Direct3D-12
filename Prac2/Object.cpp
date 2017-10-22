@@ -229,7 +229,7 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 CRevolvingObject::CRevolvingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_fRevolutionSpeed = 45.f;
+	m_fRevolutionSpeed = 15.f;
 	m_OrbitRaidus = 512.f;
 	m_CenterPos = XMFLOAT3(256.f, 0.f, 256.f);
 }
@@ -319,3 +319,5 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
+
+
