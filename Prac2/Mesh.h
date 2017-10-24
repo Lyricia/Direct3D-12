@@ -78,7 +78,10 @@ protected:
 	UINT							m_nStartIndex = 0;
 	int								m_nBaseVertex = 0;
 
+	BoundingOrientedBox				m_xmBoundingBox;
+
 public:
+	BoundingOrientedBox GetBoundingBox() { return(m_xmBoundingBox); }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
 };
 
@@ -221,19 +224,11 @@ protected:
 	int m_nWidth;
 	int m_nLength;
 
-	/*격자의 스케일(가로: x-방향, 세로: z-방향, 높이: y-방향) 벡터이다. 실제 격자 메쉬의 각 정점의 x-좌표, y-좌표,
-	z-좌표는 스케일 벡터의 x-좌표, y-좌표, z-좌표로 곱한 값을 갖는다. 즉, 실제 격자의 x-축 방향의 간격은 1이 아니
-	라 스케일 벡터의 x-좌표가 된다. 이렇게 하면 작은 격자(적은 정점)를 사용하더라도 큰 크기의 격자(지형)를 생성할
-	수 있다.*/
-	XMFLOAT3 m_xmf3Scale;
-
 public:
 	CPlaneMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-		*pd3dCommandList, int nWidth, int nLength, XMFLOAT3 xmf3Scale =
-		XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f));
+		*pd3dCommandList, int nWidth, int nLength);
 	virtual ~CPlaneMesh();
 
-	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
 	int GetWidth() { return(m_nWidth); }
 	int GetLength() { return(m_nLength); }
 };

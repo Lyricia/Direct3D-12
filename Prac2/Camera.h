@@ -44,6 +44,8 @@ protected:
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
+	BoundingFrustum					m_xmFrustum;
+
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);
@@ -100,6 +102,13 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
+
+	//절두체(월드 좌표계)를 생성한다.
+	void GenerateFrustum();
+
+	//바운딩 박스(OOBB, 월드 좌표계)가 절두체에 포함되는 가를 검사한다.
+	bool IsInFrustum(BoundingOrientedBox& xmBoundingBox);
+
 };
 
 class CSpaceShipCamera : public CCamera

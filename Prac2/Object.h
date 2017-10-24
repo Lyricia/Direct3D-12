@@ -15,6 +15,7 @@
 #define DIR_DOWN				0x20
 
 class CShader;
+class CHeightMapTerrain;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -47,6 +48,7 @@ public:
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 	void SetShader(CShader *pShader);
+
 };
 
 class CGameObject
@@ -57,6 +59,7 @@ public:
 
 public:
 	XMFLOAT4X4						m_xmf4x4World;
+	XMFLOAT3						m_Velocity;
 	//CMesh							*m_pMesh = NULL;
 	CMesh							**m_ppMeshes = NULL;
 	int								m_nMeshes = 0;
@@ -86,9 +89,11 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+	XMFLOAT3 GetVelocity() { return m_Velocity; }
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
+	void SetVelocity(XMFLOAT3 xmf3Velocity) { m_Velocity = xmf3Velocity; }
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -96,6 +101,8 @@ public:
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
+
+	bool IsVisible(CCamera *pCamera = NULL);
 };
 
 class CRotatingObject : public CGameObject
@@ -107,11 +114,12 @@ public:
 private:
 	XMFLOAT3					m_xmf3RotationAxis;
 	float						m_fRotationSpeed;
+	CHeightMapTerrain*			m_terrain;
 
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-
+	void SetTerrain(CHeightMapTerrain* pContext) { m_terrain = pContext; }
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };

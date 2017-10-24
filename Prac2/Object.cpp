@@ -36,7 +36,7 @@ CGameObject::CGameObject(int nMeshes)
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
-
+	m_Velocity = XMFLOAT3(0, 0, 0);
 	m_d3dCbvGPUDescriptorHandle.ptr = NULL;
 
 	if (m_nMeshes > 0)
@@ -101,24 +101,25 @@ void CGameObject::Animate(float fTimeElapsed)
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	OnPrepareRender();
-
-	if (m_pMaterial)
-	{
-		if (m_pMaterial->m_pShader)
+	if (IsVisible(pCamera)) {
+		if (m_pMaterial)
 		{
-			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
-			m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+			if (m_pMaterial->m_pShader)
+			{
+				m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+				m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+			}
 		}
-	}
 
-	if(m_d3dCbvGPUDescriptorHandle.ptr)
-		pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+		if (m_d3dCbvGPUDescriptorHandle.ptr)
+			pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
 
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
+		if (m_ppMeshes)
 		{
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+			}
 		}
 	}
 }
@@ -202,6 +203,18 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+bool CGameObject::IsVisible(CCamera * pCamera)
+{
+	OnPrepareRender();
+	bool bIsVisible = false;
+	BoundingOrientedBox xmBoundingBox = m_ppMeshes[0]->GetBoundingBox();
+
+	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다.
+	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	return(bIsVisible);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
@@ -216,6 +229,8 @@ CRotatingObject::~CRotatingObject()
 
 void CRotatingObject::Animate(float fTimeElapsed)
 {
+	XMFLOAT3 pos = GetPosition();
+	SetPosition(pos.x+m_Velocity.x, m_terrain->GetHeight(pos.x, pos.z) + 10, pos.z+m_Velocity.z);
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
 
@@ -229,7 +244,7 @@ void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 CRevolvingObject::CRevolvingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_fRevolutionSpeed = 15.f;
+	m_fRevolutionSpeed = 45.f;
 	m_OrbitRaidus = 512.f;
 	m_CenterPos = XMFLOAT3(256.f, 0.f, 256.f);
 }

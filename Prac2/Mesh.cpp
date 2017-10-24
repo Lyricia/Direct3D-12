@@ -20,6 +20,7 @@ CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandLis
 	m_nVertices = 0;
 	m_nStride = 0;
 	m_nOffset = 0;
+
 }
 
 CMesh::~CMesh()
@@ -114,6 +115,9 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
 }
 
 CCubeMeshDiffused::~CCubeMeshDiffused()
@@ -244,6 +248,8 @@ CAirplaneMeshDiffused::CAirplaneMeshDiffused(ID3D12Device *pd3dDevice, ID3D12Gra
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 CAirplaneMeshDiffused::~CAirplaneMeshDiffused()
@@ -562,6 +568,9 @@ CSphereMeshIlluminated::CSphereMeshIlluminated(ID3D12Device *pd3dDevice, ID3D12G
 	UINT pnBufferOffsets[2] = { 0, 0 };
 	AssembleToVertexBuffer(2, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
 #endif
+
+
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fRadius, fRadius, fRadius), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 CSphereMeshIlluminated::~CSphereMeshIlluminated()
@@ -762,6 +771,8 @@ CHeightMapGridMesh::CHeightMapGridMesh(
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 	delete[] pnIndices;
+
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(nWidth*m_xmf3Scale.x, nLength*m_xmf3Scale.z, nLength*m_xmf3Scale.z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 CHeightMapGridMesh::~CHeightMapGridMesh()
@@ -812,7 +823,7 @@ XMFLOAT3 CHeightMapGridMesh::OnGetNormal(int x, int z, void * pContext)
 
 CPlaneMesh::CPlaneMesh(
 	ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList,
-	int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CMesh(pd3dDevice, pd3dCommandList)
+	int nWidth, int nLength) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	int xStart = -nWidth *0.5;
 	int zStart = -nLength*0.5;
@@ -825,7 +836,6 @@ CPlaneMesh::CPlaneMesh(
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	m_nWidth = nWidth;
 	m_nLength = nLength;
-	m_xmf3Scale = xmf3Scale;
 
 	//CDiffusedVertex *pVertices = new CDiffusedVertex[m_nVertices];
 
@@ -837,14 +847,10 @@ CPlaneMesh::CPlaneMesh(
 	for (int i = 0, z = zStart; z < (zStart + nLength); z++) {
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
-			//정점의 높이와 색상을 높이 맵으로부터 구한다. (노말을 구하는 것으로 수정)
-
-			XMFLOAT3 xmf3Position = XMFLOAT3((x*m_xmf3Scale.x), 0, (z*m_xmf3Scale.z));
+			XMFLOAT3 xmf3Position = XMFLOAT3(x, 0, z);
 			XMFLOAT3 xmf3Normal = XMFLOAT3(0,1,0);
-			//XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
 			pVertices[i] = CIlluminatedVertex(xmf3Position, xmf3Normal);
 
-			//pVertices[i] = CDiffusedVertex(xmf3Position, xmf3Color);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
@@ -898,6 +904,8 @@ CPlaneMesh::CPlaneMesh(
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 	delete[] pnIndices;
+
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(nWidth, 0, nLength), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 
