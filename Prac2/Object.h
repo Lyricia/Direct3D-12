@@ -59,7 +59,9 @@ public:
 
 public:
 	XMFLOAT4X4						m_xmf4x4World;
-	XMFLOAT3						m_Velocity;
+	XMFLOAT3						m_Direction;
+	float							m_Speed;
+
 	//CMesh							*m_pMesh = NULL;
 	CMesh							**m_ppMeshes = NULL;
 	int								m_nMeshes = 0;
@@ -67,9 +69,15 @@ public:
 	CShader							*m_pShader = NULL;
 	CMaterial						*m_pMaterial = NULL;
 
+	CGameObject						*m_Collider = NULL;
+
+	BoundingOrientedBox				m_xmOOBB;
+	BoundingOrientedBox				m_xmOOBBTransformed;
+
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 
 	void SetMesh(int nIndex, CMesh *pMesh);
+
 	void SetShader(CShader *pShader);
 	void SetMaterial(CMaterial *pMaterial);
 	void SetMaterial(UINT nReflection);
@@ -89,11 +97,14 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
-	XMFLOAT3 GetVelocity() { return m_Velocity; }
+	XMFLOAT3 GetDirection() { return m_Direction; }
+	const BoundingOrientedBox& GetBoundingBox() const { return m_xmOOBB; }
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
-	void SetVelocity(XMFLOAT3 xmf3Velocity) { m_Velocity = xmf3Velocity; }
+	void SetDirection(XMFLOAT3 xmf3Dir) { m_Direction = xmf3Dir; }
+	void SetSpeed(float speed) { m_Speed = speed; }
+	void SetBoundingBox(const BoundingOrientedBox& OOBB) { m_xmOOBB = m_xmOOBBTransformed = OOBB; }
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -103,6 +114,9 @@ public:
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 
 	bool IsVisible(CCamera *pCamera = NULL);
+
+	CGameObject* GetCollider() const { return m_Collider; }
+	void SetCollider(CGameObject* Collider) { m_Collider = Collider; }
 };
 
 class CRotatingObject : public CGameObject

@@ -36,7 +36,8 @@ CGameObject::CGameObject(int nMeshes)
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
-	m_Velocity = XMFLOAT3(0, 0, 0);
+	m_Direction = XMFLOAT3(0, 0, 0);
+	m_Speed = 0.f;
 	m_d3dCbvGPUDescriptorHandle.ptr = NULL;
 
 	if (m_nMeshes > 0)
@@ -230,7 +231,10 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	XMFLOAT3 pos = GetPosition();
-	SetPosition(pos.x+m_Velocity.x, m_terrain->GetHeight(pos.x, pos.z) + 10, pos.z+m_Velocity.z);
+	XMFLOAT3 Vel = Vector3::ScalarProduct(m_Direction, m_Speed);
+	SetPosition(pos.x+ Vel.x, m_terrain->GetHeight(pos.x, pos.z) + 10, pos.z+ Vel.z);
+	m_xmOOBBTransformed.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+	XMStoreFloat4(&m_xmOOBBTransformed.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBBTransformed.Orientation)));
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
 

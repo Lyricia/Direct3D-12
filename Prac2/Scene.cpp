@@ -34,19 +34,20 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 	
-	// Sun
+	// Sun, Moon
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.0008f, 0.0008f, 0.0008f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
-
-	// Moon
+	
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.001f, 0.001f, 0.001f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f);
+
+	// Lights in Building
 	int i = 0, j = 0;
 	int k = 5;
 	for (int i = 0; i < 5; i++) {
@@ -83,7 +84,7 @@ void CScene::BuildLightsAndMaterials()
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
-	m_pMaterials->m_pReflections[0] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 0.5f), XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
@@ -110,11 +111,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 void CScene::BuildTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다.
-	XMFLOAT3 xmf3Scale(5.0f, 0.5f, 5.0f);
+	XMFLOAT3 xmf3Scale(3.0f, 0.5f, 3.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
-	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다.
+	int mapsizex = 513, mapsizez = 513;
+
 #ifdef _WITH_TERRAIN_PARTITION
 	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메
 	쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
@@ -122,11 +123,11 @@ void CScene::BuildTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 
 		_T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 #else
-	//지형을 하나의 격자 메쉬(257x257)로 생성한다.
 	m_pTerrain = new CHeightMapTerrain(
 		pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 
-		_T("Assets/Image/Terrain/Height3.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+		_T("Assets/Image/Terrain/Height2.raw"), mapsizex, mapsizez, mapsizex, mapsizez, xmf3Scale, xmf4Color);
 #endif
+
 }
 
 void CScene::ReleaseObjects()
@@ -283,12 +284,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (m_pPlayer->GetPosition().x < 300 && m_pPlayer->GetPosition().z < 300) {
 		m_pLights->m_pLights[1].m_bEnable = false;
 		m_pLights->m_pLights[2].m_bEnable = false;
-		for (int i = 5; i < MAX_LIGHTS; ++i){
+		for (int i = 5; i < MAX_LIGHTS; ++i) {
 			m_pLights->m_pLights[i].m_bEnable = true;
 		}
 	}
 	else {
-		for (int i = 5; i < MAX_LIGHTS; ++i) 
+		for (int i = 5; i < MAX_LIGHTS; ++i)
 			m_pLights->m_pLights[i].m_bEnable = false;
 
 		XMFLOAT3 Pos = m_pShaders[0].getObject(0)->GetPosition();
@@ -304,22 +305,74 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[2].m_xmf3Direction = Dir;
 	}
 
+	int objend = 8 * 8 + 2;
+	int objstart = 2;
+	//int objend = 2 +2;
 	// Wall Collision
-	for (int i = 2; i < 8 * 8 + 2; i++) {
+	for (int i = objstart; i < objend; i++) {
 		CGameObject* tmp = m_pShaders[0].getObject(i);
-		if (tmp->GetPosition().x < 0 ||
-			tmp->GetPosition().x > 1285) {
-			XMFLOAT3 vel = tmp->GetVelocity();
-			tmp->SetVelocity(XMFLOAT3(vel.x * (-1), 0, vel.z));
+		XMFLOAT3 pos = tmp->GetPosition();
+		if (pos.x < 10 || pos.x > 1275){
+			XMFLOAT3 dir = tmp->GetDirection();
+			tmp->SetDirection(XMFLOAT3(dir.x * (-1), 0, dir.z));
 		}
-		if(tmp->GetPosition().z < 0 ||
-			tmp->GetPosition().z > 1285) {
-			XMFLOAT3 vel = tmp->GetVelocity();
-			tmp->SetVelocity(XMFLOAT3(vel.x, 0, vel.z * (-1)));
+		if (pos.z < 10 || pos.z > 1275) {
+			XMFLOAT3 dir = tmp->GetDirection();
+			tmp->SetDirection(XMFLOAT3(dir.x, 0, dir.z * (-1)));
 		}
+		if (pos.z < 310 && pos.x < 310) {
+			XMFLOAT3 dir = tmp->GetDirection();
+			if(pos.x>pos.z)
+				tmp->SetDirection(XMFLOAT3(dir.x * (-1), 0, dir.z));
+			else if(pos.x < pos.z)
+				tmp->SetDirection(XMFLOAT3(dir.x, 0, dir.z * (-1)));
+		}
+	}
 
+	for (int i = objstart; i < objend; i++)
+	{
+		for (int j = objstart; j < objend; j++)
+		{
+			if (i != j) {
+				CGameObject* Obj1 = m_pShaders[0].getObject(i);
+				BoundingOrientedBox ObjOOBB1 = Obj1->GetBoundingBox();
+				CGameObject* Obj2 = m_pShaders[0].getObject(j);
+				BoundingOrientedBox ObjOOBB2 = Obj2->GetBoundingBox();
+
+				if (Obj1->GetCollider() == NULL || Obj1->GetCollider() == Obj2){
+					if (ObjOOBB1.Intersects(ObjOOBB2)) {
+						Obj1->SetCollider(Obj2);
+						Obj2->SetCollider(Obj1);
+					}
+				}
+			}
+		}
+	}
+
+	for (int i = objstart; i < objend; i++)
+	{
+		CGameObject* Obj = m_pShaders[0].getObject(i);
+		if (Obj->GetCollider() && Obj->GetCollider()->GetCollider())
+		{
+			CGameObject* Collider = Obj->GetCollider();
+			XMFLOAT3 xmf3ObjPos = Obj->GetPosition();
+			XMFLOAT3 xmf3ColliderPos = Collider->GetPosition();
+
+			XMFLOAT3 direct = Vector3::Normalize(Vector3::Add(xmf3ObjPos, xmf3ColliderPos, -1.0f));
+			XMFLOAT3 reflect;
+			XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj->GetDirection()), XMLoadFloat3(&direct)));
+			Obj->SetDirection(reflect);
+
+			direct = Vector3::Normalize(Vector3::Add(xmf3ColliderPos, xmf3ObjPos, -1.0f));
+			XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Collider->GetDirection()), XMLoadFloat3(&direct)));
+			Collider->SetDirection(reflect);
+
+			Obj->SetCollider(NULL);
+			Collider->SetCollider(NULL);
+		}
 	}
 }
+
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {

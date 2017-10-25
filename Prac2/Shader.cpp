@@ -458,16 +458,18 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			{
 				for (int z = 0; z < zObjects; z++)
 				{
-					float xPosition = x * fxPitch + 300;
-					float zPosition = z * fzPitch + 300;
+					float xPosition = x * fxPitch + 320;
+					float zPosition = z * fzPitch + 320;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 	
 					pRotatingObject = new CRotatingObject(1);
 					pRotatingObject->SetMesh(0, pSphereMesh);
 					pRotatingObject->SetMaterial(i%MAX_MATERIALS);
 					pRotatingObject->SetTerrain((CHeightMapTerrain*)pContext);
-					pRotatingObject->SetVelocity(XMFLOAT3((-5+(rand() + 1) % 10) * 0.03f, 0, (-5 + (rand() + 1) % 10) * 0.03f));
+					pRotatingObject->SetDirection(Vector3::Normalize(XMFLOAT3((-4 + (rand() + 1) % 9), 0, (-4 + (rand() + 1) % 9))));
+					pRotatingObject->SetSpeed(0.1f);
 					pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
+					pRotatingObject->SetBoundingBox(pSphereMesh->GetBoundingBox());
 					if (y == 0)
 					{
 						/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선
