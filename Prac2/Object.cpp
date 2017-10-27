@@ -231,7 +231,7 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	XMFLOAT3 pos = GetPosition();
-	XMFLOAT3 Vel = Vector3::ScalarProduct(m_Direction, m_Speed);
+	XMFLOAT3 Vel = Vector3::ScalarProduct(m_Direction, m_Speed* fTimeElapsed);
 	SetPosition(pos.x+ Vel.x, m_terrain->GetHeight(pos.x, pos.z) + 10, pos.z+ Vel.z);
 	m_xmOOBBTransformed.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 	XMStoreFloat4(&m_xmOOBBTransformed.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBBTransformed.Orientation)));

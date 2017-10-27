@@ -412,16 +412,11 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
 
-	float fxPitch = 50.f, fyPitch = 50.f, fzPitch = 50.f;
 
 	//int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch), i = 0;
 	int xObjects = 8, yObjects = 1, zObjects = 8, i = 0;
-	CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 10);
-	CSphereMeshIlluminated *pSphereMesh2 = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList,100);
-	//CCubeMeshIlluminated *pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 0.f, 0.f, 0.f);
 
-	m_nObjects = (xObjects) * (yObjects) * (zObjects) + 2 + 8;
-	//m_nObjects = 2 + 8;
+	m_nObjects = (xObjects) * (yObjects) * (zObjects)+ 2 + 8;
 
 	m_ppObjects = new CGameObject*[m_nObjects];
 
@@ -431,9 +426,10 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	{
 		// Sun, Moon
 		float radius = 1024.f;
+		CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 100);
 		CRevolvingObject *pRevolvingObject = NULL;
 		pRevolvingObject = new CRevolvingObject();
-		pRevolvingObject->SetMesh(0, pSphereMesh2);
+		pRevolvingObject->SetMesh(0, pSphereMesh);
 		pRevolvingObject->SetMaterial(1);
 		pRevolvingObject->SetRadius(-radius);
 		pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
@@ -441,7 +437,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[i++] = pRevolvingObject;
 
 		pRevolvingObject = new CRevolvingObject();
-		pRevolvingObject->SetMesh(0, pSphereMesh2);
+		pRevolvingObject->SetMesh(0, pSphereMesh);
 		pRevolvingObject->SetMaterial(1);
 		pRevolvingObject->SetRadius(radius);
 		pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
@@ -450,6 +446,9 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	}
 
 	{
+		float fxPitch = 100.f, fyPitch = 100.f, fzPitch = 100.f;
+
+		CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 20);
 		CRotatingObject *pRotatingObject = NULL;
 		XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 		for (int x = 0; x < xObjects; x++)
@@ -458,8 +457,8 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			{
 				for (int z = 0; z < zObjects; z++)
 				{
-					float xPosition = x * fxPitch + 320;
-					float zPosition = z * fzPitch + 320;
+					float xPosition = x * fxPitch + 400;
+					float zPosition = z * fzPitch + 400;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 	
 					pRotatingObject = new CRotatingObject(1);
@@ -467,22 +466,22 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 					pRotatingObject->SetMaterial(i%MAX_MATERIALS);
 					pRotatingObject->SetTerrain((CHeightMapTerrain*)pContext);
 					pRotatingObject->SetDirection(Vector3::Normalize(XMFLOAT3((-4 + (rand() + 1) % 9), 0, (-4 + (rand() + 1) % 9))));
-					pRotatingObject->SetSpeed(0.1f);
+					pRotatingObject->SetSpeed(100.f);
 					pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
 					pRotatingObject->SetBoundingBox(pSphereMesh->GetBoundingBox());
-					if (y == 0)
-					{
-						/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선
-						벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
-						xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-						xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-	
-						if (Vector3::IsZero(xmf3RotateAxis))
-							xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	
-						float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-						pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-					}
+					//if (y == 0)
+					//{
+					//	/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선
+					//	벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
+					//	xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
+					//	xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
+					//
+					//	if (Vector3::IsZero(xmf3RotateAxis))
+					//		xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+					//
+					//	float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
+					//	pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+					//}
 					pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 					pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
 	
@@ -490,11 +489,12 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 					pRotatingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 	
 					m_ppObjects[i++] = pRotatingObject;
+
 				}
 			}
 		}
 	}
-	
+
 	{
 		// Building Mesh
 		CPlaneMesh* pPlane = new CPlaneMesh(pd3dDevice, pd3dCommandList, 310, 110);

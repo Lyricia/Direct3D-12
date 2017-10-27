@@ -305,9 +305,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[2].m_xmf3Direction = Dir;
 	}
 
-	int objend = 8 * 8 + 2;
 	int objstart = 2;
-	//int objend = 2 +2;
+	int objend = 8 * 8 + 2;
+	//int objend = 2 * 2 + 2;
 	// Wall Collision
 	for (int i = objstart; i < objend; i++) {
 		CGameObject* tmp = m_pShaders[0].getObject(i);
@@ -329,48 +329,78 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
-	for (int i = objstart; i < objend; i++)
+	for (int i = objstart; i < objend; ++i) 
 	{
-		for (int j = objstart; j < objend; j++)
+		for (int j = objstart; j < objend; ++j)
 		{
 			if (i != j) {
 				CGameObject* Obj1 = m_pShaders[0].getObject(i);
-				BoundingOrientedBox ObjOOBB1 = Obj1->GetBoundingBox();
+				XMFLOAT3 pos1 = Obj1->GetPosition();
 				CGameObject* Obj2 = m_pShaders[0].getObject(j);
-				BoundingOrientedBox ObjOOBB2 = Obj2->GetBoundingBox();
+				XMFLOAT3 pos2 = Obj2->GetPosition();
 
-				if (Obj1->GetCollider() == NULL || Obj1->GetCollider() == Obj2){
-					if (ObjOOBB1.Intersects(ObjOOBB2)) {
-						Obj1->SetCollider(Obj2);
-						Obj2->SetCollider(Obj1);
-					}
+				if ((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.z - pos2.z) * (pos1.z - pos2.z) < 40 * 40) {
+					//Obj1->SetCollider(Obj2);
+					//Obj2->SetCollider(Obj1);
+
+					XMFLOAT3 direct = Vector3::Normalize(Vector3::Subtract(pos1, pos2));
+					XMFLOAT3 reflect;
+					XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj1->GetDirection()), XMLoadFloat3(&direct)));
+					Obj1->SetDirection(Vector3::Normalize(reflect));
+					Obj1->SetPosition(Vector3::Add(Obj1->GetPosition(), direct));
+					
+					direct = Vector3::Normalize(Vector3::Subtract(pos2, pos1));
+					XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj2->GetDirection()), XMLoadFloat3(&direct)));
+					Obj2->SetDirection(Vector3::Normalize(reflect));
+					Obj2->SetPosition(Vector3::Add(Obj2->GetPosition(), direct));
 				}
 			}
 		}
 	}
 
-	for (int i = objstart; i < objend; i++)
-	{
-		CGameObject* Obj = m_pShaders[0].getObject(i);
-		if (Obj->GetCollider() && Obj->GetCollider()->GetCollider())
-		{
-			CGameObject* Collider = Obj->GetCollider();
-			XMFLOAT3 xmf3ObjPos = Obj->GetPosition();
-			XMFLOAT3 xmf3ColliderPos = Collider->GetPosition();
+	//for (int i = objstart; i < objend; i++)
+	//{
+	//	for (int j = objstart; j < objend; j++)
+	//	{
+	//		if (i != j) {
+	//			CGameObject* Obj1 = m_pShaders[0].getObject(i);
+	//			BoundingOrientedBox ObjOOBB1 = Obj1->GetBoundingBox();
+	//			CGameObject* Obj2 = m_pShaders[0].getObject(j);
+	//			BoundingOrientedBox ObjOOBB2 = Obj2->GetBoundingBox();
+	//
+	//			if (Obj1->GetCollider() == NULL || Obj1->GetCollider() == Obj2){
+	//				if (ObjOOBB1.Intersects(ObjOOBB2)) {
+	//					Obj1->SetCollider(Obj2);
+	//					Obj2->SetCollider(Obj1);
+	//				}
+	//			}
+	//		}
+	//	}
+	//
 
-			XMFLOAT3 direct = Vector3::Normalize(Vector3::Add(xmf3ObjPos, xmf3ColliderPos, -1.0f));
-			XMFLOAT3 reflect;
-			XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj->GetDirection()), XMLoadFloat3(&direct)));
-			Obj->SetDirection(reflect);
+	//for (int i = objstart; i < objend; i++)
+	//{
+	//	CGameObject* Obj = m_pShaders[0].getObject(i);
+	//	if (Obj->GetCollider() && Obj->GetCollider()->GetCollider())
+	//	{
+	//		CGameObject* Collider = Obj->GetCollider();
+	//		XMFLOAT3 xmf3ObjPos = Obj->GetPosition();
+	//		XMFLOAT3 xmf3ColliderPos = Collider->GetPosition();
+	//		XMFLOAT3 direct = Vector3::Normalize(Vector3::Subtract(xmf3ObjPos, xmf3ColliderPos));
+	//		XMFLOAT3 reflect;
+	//		XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj->GetDirection()), XMLoadFloat3(&direct)));
+	//		Obj->SetDirection(reflect);
+	//		//Obj->Animate(0.3f);
 
-			direct = Vector3::Normalize(Vector3::Add(xmf3ColliderPos, xmf3ObjPos, -1.0f));
-			XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Collider->GetDirection()), XMLoadFloat3(&direct)));
-			Collider->SetDirection(reflect);
+	//		direct = Vector3::Normalize(Vector3::Subtract(xmf3ColliderPos, xmf3ObjPos));
+	//		XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Collider->GetDirection()), XMLoadFloat3(&direct)));
+	//		Collider->SetDirection(reflect);
+	//		//Collider->Animate(0.3f);
 
-			Obj->SetCollider(NULL);
-			Collider->SetCollider(NULL);
-		}
-	}
+	//		Obj->SetCollider(NULL);
+	//		Collider->SetCollider(NULL);
+	//	}
+	//}
 }
 
 

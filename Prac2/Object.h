@@ -57,6 +57,8 @@ public:
 	CGameObject(int nMeshes = 1);
     virtual ~CGameObject();
 
+	float m_timer = 0.f;
+
 public:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT3						m_Direction;

@@ -511,11 +511,6 @@ void CGameFramework::ProcessInput()
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
-void CGameFramework::AnimateObjects()
-{
-	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
-}
-
 void CGameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
@@ -543,11 +538,16 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
+void CGameFramework::AnimateObjects()
+{
+	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+}
+
 //#define _WITH_PLAYER_TOP
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(144.f);
 	
 	ProcessInput();
 
