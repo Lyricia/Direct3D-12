@@ -369,8 +369,8 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case FIRST_PERSON_CAMERA:
 		SetFriction(250.0f);
 		//1인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
-		//SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+		//SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(1000.f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
