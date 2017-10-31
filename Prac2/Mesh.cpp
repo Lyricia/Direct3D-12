@@ -839,12 +839,8 @@ CPlaneMesh::CPlaneMesh(
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 
-	//CDiffusedVertex *pVertices = new CDiffusedVertex[m_nVertices];
-
 	CIlluminatedVertex *pVertices = new CIlluminatedVertex[m_nVertices];
 
-	/*xStart와 zStart는 격자의 시작 위치(x-좌표와 z-좌표)를 나타낸다. 커다란 지형은 격자들의 이차원 배열로 만들 필
-	요가 있기 때문에 전체 지형에서 각 격자의 시작 위치를 나타내는 정보가 필요하다.*/
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	for (int i = 0, z = zStart; z < (zStart + nLength); z++) {
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
@@ -874,24 +870,18 @@ CPlaneMesh::CPlaneMesh(
 	{
 		if ((z % 2) == 0)
 		{
-			//홀수 번째 줄이므로(z = 0, 2, 4, ...) 인덱스의 나열 순서는 왼쪽에서 오른쪽 방향이다.
 			for (int x = 0; x < nWidth; x++)
 			{
-				//첫 번째 줄을 제외하고 줄이 바뀔 때마다(x == 0) 첫 번째 인덱스를 추가한다.
 				if ((x == 0) && (z > 0)) pnIndices[j++] = (UINT)(x + (z * nWidth));
-				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
 				pnIndices[j++] = (UINT)(x + (z * nWidth));
 				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
 			}
 		}
 		else
 		{
-			//짝수 번째 줄이므로(z = 1, 3, 5, ...) 인덱스의 나열 순서는 오른쪽에서 왼쪽 방향이다.
 			for (int x = nWidth - 1; x >= 0; x--)
 			{
-				//줄이 바뀔 때마다(x == (nWidth-1)) 첫 번째 인덱스를 추가한다.
 				if (x == (nWidth - 1)) pnIndices[j++] = (UINT)(x + (z * nWidth));
-				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
 				pnIndices[j++] = (UINT)(x + (z * nWidth));
 				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
 			}
@@ -907,7 +897,7 @@ CPlaneMesh::CPlaneMesh(
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 	delete[] pnIndices;
 
-	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(nWidth, 0, nLength), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_xmBoundingBox = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(nWidth*0.5, 0, nLength*0.5), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 

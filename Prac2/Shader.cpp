@@ -416,7 +416,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	//int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch), i = 0;
 	int xObjects = 8, yObjects = 1, zObjects = 8, i = 0;
 
-	m_nObjects = (xObjects) * (yObjects) * (zObjects)+ 2 + 8;
+	m_nObjects = (xObjects) * (yObjects) * (zObjects) + 2 + 8;
 
 	m_ppObjects = new CGameObject*[m_nObjects];
 
@@ -425,14 +425,14 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 	{
 		// Sun, Moon
-		float radius = 1024.f;
+		float radius = 1536.f;
 		CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 100);
 		CRevolvingObject *pRevolvingObject = NULL;
 		pRevolvingObject = new CRevolvingObject();
 		pRevolvingObject->SetMesh(0, pSphereMesh);
 		pRevolvingObject->SetMaterial(1);
 		pRevolvingObject->SetRadius(-radius);
-		pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
+		pRevolvingObject->SetCenterPos(XMFLOAT3(768.f, 0, 768.f));
 		pRevolvingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pRevolvingObject;
 
@@ -440,7 +440,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		pRevolvingObject->SetMesh(0, pSphereMesh);
 		pRevolvingObject->SetMaterial(1);
 		pRevolvingObject->SetRadius(radius);
-		pRevolvingObject->SetCenterPos(XMFLOAT3(radius*0.5f, 0, radius*0.5f));
+		pRevolvingObject->SetCenterPos(XMFLOAT3(768.f, 0, 768.f));
 		pRevolvingObject->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pRevolvingObject;
 	}
@@ -450,7 +450,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 
 		CSphereMeshIlluminated *pSphereMesh = new CSphereMeshIlluminated(pd3dDevice, pd3dCommandList, 20);
 		CRotatingObject *pRotatingObject = NULL;
-		XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
+		//XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 		for (int x = 0; x < xObjects; x++)
 		{
 			for (int y = 0; y < yObjects; y++)
@@ -467,7 +467,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 					pRotatingObject->SetTerrain((CHeightMapTerrain*)pContext);
 					pRotatingObject->SetDirection(Vector3::Normalize(XMFLOAT3((-4 + (rand() + 1) % 9), 0, (-4 + (rand() + 1) % 9))));
 					pRotatingObject->SetSpeed(100.f);
-					pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
+					pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 20.0f, zPosition);
 					pRotatingObject->SetBoundingBox(pSphereMesh->GetBoundingBox());
 					//if (y == 0)
 					//{
@@ -498,7 +498,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	{
 		// Building Mesh
 		CPlaneMesh* pPlane = new CPlaneMesh(pd3dDevice, pd3dCommandList, 310, 110);
-		CPlaneMesh* pPlane2 = new CPlaneMesh(pd3dDevice, pd3dCommandList, 220, 110);
+		CPlaneMesh* pPlane2 = new CPlaneMesh(pd3dDevice, pd3dCommandList, 250, 110);
 		CPlaneMesh* pRoof = new CPlaneMesh(pd3dDevice, pd3dCommandList, 310, 310);
 
 		XMFLOAT3 axis_x = { 1.f,0.f,0.f }, axis_y = { 0.f,1.f,0.f }, axis_z = { 0.f,0.f,1.f };
@@ -506,54 +506,65 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		// Map edge wall
 		CGameObject* pBuilding = new CGameObject();
 		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetBoundingBox(pPlane->GetBoundingBox());
 		pBuilding->SetMaterial(3);
-		pBuilding->SetPosition(150, 50, 0);
 		pBuilding->Rotate(&axis_x, 90.f);
+		pBuilding->SetPosition(150, 50, 0);
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
 		pBuilding = new CGameObject();
 		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetBoundingBox(pPlane->GetBoundingBox());
 		pBuilding->SetMaterial(3);
 		pBuilding->Rotate(&axis_y, 90.f);
 		pBuilding->Rotate(&axis_x, 90.f);
 		pBuilding->SetPosition(0, 50, 150);
+
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
 		// Inside 
 		pBuilding = new CGameObject();
 		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetBoundingBox(pPlane->GetBoundingBox());
 		pBuilding->SetMaterial(3);
-		pBuilding->SetPosition(301, 50, 150);
 		pBuilding->Rotate(&axis_y, 90.f);
 		pBuilding->Rotate(&axis_x, 90.f);
+		pBuilding->SetPosition(301, 50, 150);
+
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
 		pBuilding = new CGameObject();
 		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetBoundingBox(pPlane->GetBoundingBox());
 		pBuilding->SetMaterial(3);
-		pBuilding->SetPosition(300, 50, 150);
 		pBuilding->Rotate(&axis_y, -90.f);
 		pBuilding->Rotate(&axis_x, 90.f);
+		pBuilding->SetPosition(300, 50, 150);
+
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
 		pBuilding = new CGameObject();
-		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetMesh(0, pPlane2);
+		pBuilding->SetBoundingBox(pPlane2->GetBoundingBox());
 		pBuilding->SetMaterial(3);
-		pBuilding->SetPosition(120, 50, 300);
 		pBuilding->Rotate(&axis_x, -90.f);
+		pBuilding->SetPosition(120, 50, 300);
+
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
 		pBuilding = new CGameObject();
-		pBuilding->SetMesh(0, pPlane);
+		pBuilding->SetMesh(0, pPlane2);
+		pBuilding->SetBoundingBox(pPlane2->GetBoundingBox());
 		pBuilding->SetMaterial(3);
-		pBuilding->SetPosition(120, 50, 300);
 		pBuilding->Rotate(&axis_x, -90.f);
 		pBuilding->Rotate(&axis_x, 180.f);
+		pBuilding->SetPosition(120, 50, 300);
+
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;
 
@@ -570,7 +581,6 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		pBuilding = new CGameObject();
 		pBuilding->SetMesh(0, pRoof);
 		pBuilding->SetMaterial(3);
-		//pBuilding->Rotate(&axis_x, 180.f);
 		pBuilding->SetPosition(150, 101, 150);
 		pBuilding->SetCbvGPUDescriptorHandle(d3dCbvSrvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBuilding;

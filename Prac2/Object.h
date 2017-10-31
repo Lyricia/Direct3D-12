@@ -163,7 +163,7 @@ public:
 
 	void SetRadius(float radius) { m_OrbitRaidus = radius; }
 	void SetCenterPos(XMFLOAT3 pos) { m_CenterPos = pos; }
-
+	void SetAngle(float angle) { m_OrbitAngle = angle; }
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);

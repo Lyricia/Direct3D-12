@@ -140,7 +140,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameFramework.h" />
-    <ClInclude Include="LabProject07-1.h" />
+    <ClInclude Include="LabProject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
@@ -154,7 +154,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameFramework.cpp" />
-    <ClCompile Include="LabProject07-1.cpp" />
+    <ClCompile Include="LabProject.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -169,10 +169,10 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LabProject07-1.rc" />
+    <ResourceCompile Include="LabProject.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="LabProject07-1.ico" />
+    <Image Include="LabProject.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

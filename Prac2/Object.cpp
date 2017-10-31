@@ -97,6 +97,8 @@ void CGameObject::SetMaterial(UINT nReflection)
 
 void CGameObject::Animate(float fTimeElapsed)
 {
+	m_xmOOBBTransformed.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+	XMStoreFloat4(&m_xmOOBBTransformed.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBBTransformed.Orientation)));
 }
 
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -232,7 +234,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 {
 	XMFLOAT3 pos = GetPosition();
 	XMFLOAT3 Vel = Vector3::ScalarProduct(m_Direction, m_Speed* fTimeElapsed);
-	SetPosition(pos.x+ Vel.x, m_terrain->GetHeight(pos.x, pos.z) + 10, pos.z+ Vel.z);
+	SetPosition(pos.x+ Vel.x, m_terrain->GetHeight(pos.x, pos.z) + 20.0f, pos.z+ Vel.z);
 	m_xmOOBBTransformed.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 	XMStoreFloat4(&m_xmOOBBTransformed.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBBTransformed.Orientation)));
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
@@ -250,7 +252,7 @@ CRevolvingObject::CRevolvingObject(int nMeshes) : CGameObject(nMeshes)
 	m_xmf3RevolutionAxis = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_fRevolutionSpeed = 45.f;
 	m_OrbitRaidus = 512.f;
-	m_CenterPos = XMFLOAT3(256.f, 0.f, 256.f);
+	m_CenterPos = XMFLOAT3(512.f, 0.f, 512.f);
 }
 
 CRevolvingObject::~CRevolvingObject()

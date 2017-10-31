@@ -23,7 +23,7 @@ void CScene::BuildLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 100.0f;
+	m_pLights->m_pLights[0].m_fRange = 500.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
@@ -31,21 +31,21 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[0].m_fFalloff = 8.0f;
-	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
+	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(25.0f));
 	
 	// Sun, Moon
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.0008f, 0.0008f, 0.0008f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.f, 0.f, 0.f, .0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.f, 0.f, 0.f, .0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 	
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.001f, 0.001f, 0.001f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.0005f, 0.0005f, 0.0005f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.3f);
 
 	// Lights in Building
 	int i = 0, j = 0;
@@ -84,7 +84,7 @@ void CScene::BuildLightsAndMaterials()
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
-	m_pMaterials->m_pReflections[0] = { XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(0.0f, 1.0f, 0.7f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.01f, 0.01f, 0.01f, 0.01f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
@@ -111,7 +111,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 void CScene::BuildTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	XMFLOAT3 xmf3Scale(3.0f, 0.5f, 3.0f);
+	XMFLOAT3 xmf3Scale(3.0f, 1.0f, 3.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
 	int mapsizex = 513, mapsizez = 513;
@@ -175,7 +175,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[0];
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Materials
@@ -187,7 +187,12 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = 
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | 
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | 
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -264,12 +269,29 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 		if (pKeysBuffer['P'] & 0xF0) 		m_pPlayer->SetPosition(XMFLOAT3(400, 0, 400));
 		if (pKeysBuffer['O'] & 0xF0) 		m_pLights->m_pLights[0].m_bEnable = false;
 		if (pKeysBuffer['I'] & 0xF0) 		m_pLights->m_pLights[0].m_bEnable = true;
+		if (pKeysBuffer['N'] & 0xF0) {
+			m_pLights->m_pLights[2].m_bEnable = false;
+			lighttoggle = true;
+		}
+		if (pKeysBuffer['M'] & 0xF0) {
+			m_pLights->m_pLights[2].m_bEnable = true;
+			lighttoggle = false;
+		}
+		if (pKeysBuffer['B'] & 0xF0) {
+			m_pLights->m_pLights[2].m_bEnable = true;
+			CRevolvingObject* sun = static_cast<CRevolvingObject*>(m_pShaders[0].getObject(1));
+			CRevolvingObject* moon = static_cast<CRevolvingObject*>(m_pShaders[0].getObject(0));
+			moon->SetAngle(4.71f);
+			sun->SetAngle(1.07f);
+			lighttoggle = false;
+		}
 	}
 	return(false);
 }
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+	m_pPlayer->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		m_pShaders[i].AnimateObjects(fTimeElapsed);
@@ -293,21 +315,22 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			m_pLights->m_pLights[i].m_bEnable = false;
 
 		XMFLOAT3 Pos = m_pShaders[0].getObject(0)->GetPosition();
-		XMFLOAT3 Dir = Vector3::Subtract(XMFLOAT3(512.f, 0.f, 512.f), Pos);
-		m_pLights->m_pLights[1].m_bEnable = true;
+		XMFLOAT3 Dir = Vector3::Subtract(XMFLOAT3(768.f, 0.f, 768.f), Pos);
+		if(!lighttoggle)
+			m_pLights->m_pLights[1].m_bEnable = true;
 		m_pLights->m_pLights[1].m_xmf3Position = Pos;
 		m_pLights->m_pLights[1].m_xmf3Direction = Dir;
 
 		Pos = m_pShaders[0].getObject(1)->GetPosition();
-		Dir = Vector3::Subtract(XMFLOAT3(512.f, 0.f, 512.f), Pos);
-		m_pLights->m_pLights[2].m_bEnable = true;
+		Dir = Vector3::Subtract(XMFLOAT3(768.f, 0.f, 768.f), Pos);
+		if (!lighttoggle)
+			m_pLights->m_pLights[2].m_bEnable = true;
 		m_pLights->m_pLights[2].m_xmf3Position = Pos;
 		m_pLights->m_pLights[2].m_xmf3Direction = Dir;
 	}
 
 	int objstart = 2;
 	int objend = 8 * 8 + 2;
-	//int objend = 2 * 2 + 2;
 	// Wall Collision
 	for (int i = objstart; i < objend; i++) {
 		CGameObject* tmp = m_pShaders[0].getObject(i);
@@ -320,7 +343,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			XMFLOAT3 dir = tmp->GetDirection();
 			tmp->SetDirection(XMFLOAT3(dir.x, 0, dir.z * (-1)));
 		}
-		if (pos.z < 310 && pos.x < 310) {
+		if (pos.z < 320 && pos.x < 320) {
 			XMFLOAT3 dir = tmp->GetDirection();
 			if(pos.x>pos.z)
 				tmp->SetDirection(XMFLOAT3(dir.x * (-1), 0, dir.z));
@@ -340,9 +363,6 @@ void CScene::AnimateObjects(float fTimeElapsed)
 				XMFLOAT3 pos2 = Obj2->GetPosition();
 
 				if ((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.z - pos2.z) * (pos1.z - pos2.z) < 40 * 40) {
-					//Obj1->SetCollider(Obj2);
-					//Obj2->SetCollider(Obj1);
-
 					XMFLOAT3 direct = Vector3::Normalize(Vector3::Subtract(pos1, pos2));
 					XMFLOAT3 reflect;
 					XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj1->GetDirection()), XMLoadFloat3(&direct)));
@@ -357,50 +377,17 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 	}
-
-	//for (int i = objstart; i < objend; i++)
-	//{
-	//	for (int j = objstart; j < objend; j++)
-	//	{
-	//		if (i != j) {
-	//			CGameObject* Obj1 = m_pShaders[0].getObject(i);
-	//			BoundingOrientedBox ObjOOBB1 = Obj1->GetBoundingBox();
-	//			CGameObject* Obj2 = m_pShaders[0].getObject(j);
-	//			BoundingOrientedBox ObjOOBB2 = Obj2->GetBoundingBox();
-	//
-	//			if (Obj1->GetCollider() == NULL || Obj1->GetCollider() == Obj2){
-	//				if (ObjOOBB1.Intersects(ObjOOBB2)) {
-	//					Obj1->SetCollider(Obj2);
-	//					Obj2->SetCollider(Obj1);
-	//				}
-	//			}
-	//		}
-	//	}
-	//
-
-	//for (int i = objstart; i < objend; i++)
-	//{
-	//	CGameObject* Obj = m_pShaders[0].getObject(i);
-	//	if (Obj->GetCollider() && Obj->GetCollider()->GetCollider())
-	//	{
-	//		CGameObject* Collider = Obj->GetCollider();
-	//		XMFLOAT3 xmf3ObjPos = Obj->GetPosition();
-	//		XMFLOAT3 xmf3ColliderPos = Collider->GetPosition();
-	//		XMFLOAT3 direct = Vector3::Normalize(Vector3::Subtract(xmf3ObjPos, xmf3ColliderPos));
-	//		XMFLOAT3 reflect;
-	//		XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Obj->GetDirection()), XMLoadFloat3(&direct)));
-	//		Obj->SetDirection(reflect);
-	//		//Obj->Animate(0.3f);
-
-	//		direct = Vector3::Normalize(Vector3::Subtract(xmf3ColliderPos, xmf3ObjPos));
-	//		XMStoreFloat3(&reflect, XMVector3Reflect(XMLoadFloat3(&Collider->GetDirection()), XMLoadFloat3(&direct)));
-	//		Collider->SetDirection(reflect);
-	//		//Collider->Animate(0.3f);
-
-	//		Obj->SetCollider(NULL);
-	//		Collider->SetCollider(NULL);
-	//	}
-	//}
+	
+	{
+		for (int i = objend; i < objend + 6; i++) {
+			BoundingOrientedBox PlayerOOBB = m_pPlayer->GetBoundingBox();
+			BoundingOrientedBox ObjectOOBB = m_pShaders[0].getObject(i)->GetBoundingBox();
+			
+			if (PlayerOOBB.Intersects(ObjectOOBB)) {
+				m_pPlayer->SetPosition(Vector3::Add(m_pPlayer->GetPosition(), m_pPlayer->GetLookVector(),-0.5));
+			}
+		}
+	}
 }
 
 

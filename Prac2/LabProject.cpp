@@ -1,8 +1,5 @@
-// LabProject07-1.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
-//
-
 #include "stdafx.h"
-#include "LabProject07-1.h"
+#include "LabProject.h"
 #include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
@@ -27,12 +24,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	HACCEL hAccelTable;
 
 	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_LABPROJECT071, szWindowClass, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_LABPROJECT, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT071));
+	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT));
 
 	while (1)
 	{
@@ -69,7 +66,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT071));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT071);
+	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 

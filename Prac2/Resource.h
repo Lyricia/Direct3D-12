@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by LabProject07-1.rc
+// Used by LabProject.rc
 //
 
 #define IDS_APP_TITLE			103
@@ -12,7 +12,7 @@
 #define IDM_EXIT				105
 #define IDI_LABPROJECT071			107
 #define IDI_SMALL				108
-#define IDC_LABPROJECT071			109
+#define IDC_LABPROJECT			109
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1

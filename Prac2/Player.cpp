@@ -336,6 +336,9 @@ CTerrainPlayer::CTerrainPlayer(
 	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 4.0f, 12.0f, 4.0f);
 	SetMesh(0, pCubeMesh);
 
+	SetBoundingBox(pCubeMesh->GetBoundingBox());
+	
+
 	//플레이어를 렌더링할 셰이더를 생성한다.
 	CPlayerShader *pShader = new CPlayerShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -343,6 +346,14 @@ CTerrainPlayer::CTerrainPlayer(
 
 	SetShader(pShader);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CTerrainPlayer::OnPrepareRender()
+{
+	CPlayer::OnPrepareRender();
+
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
 CTerrainPlayer::~CTerrainPlayer()
@@ -360,7 +371,6 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		//1인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
 		//SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
 		SetMaxVelocityXZ(1000.f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
@@ -386,7 +396,6 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		//3인칭 카메라일 때 플레이어에 y-축 방향으로 중력이 작용한다.
 		SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
 		//SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
 		SetMaxVelocityXZ(1300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
