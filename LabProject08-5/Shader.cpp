@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "Player.h"
 #include "Shader.h"
 #include "DDSTextureLoader12.h"
 
@@ -423,16 +424,16 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = (xObjects * yObjects * zObjects);
 
 	CTexture *pTexture = new CTexture(6, RESOURCE_TEXTURE2D_ARRAY, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/Tree24.dds", 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/rocks2.dds", 1);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/brick02.dds", 2);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/brick01.dds", 3);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/Stone.dds", 4);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/brick01.dds", 5);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Tree24.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/rocks2.dds", 1);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick02.dds", 2);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick01.dds", 3);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Stone.dds", 4);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick01.dds", 5);
 
 	CTexture *pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 
-	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Miscellaneous/Tree24.DDS", 0);
+	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Tree24.DDS", 0);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 
@@ -471,14 +472,6 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				float zPosition = 500 + fzPitch*z;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pTree->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) +25.f, zPosition);
-				//if (y == 0)
-				//{
-				//	xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-				//	xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-				//	if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-				//	float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-				//	pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-				//}
 				pTree->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 				m_ppObjects[i++] = pTree;
 			}
@@ -507,14 +500,17 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CObjectsShader::AnimateObjects(float fTimeElapsed, void* pContext)
+void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer * player)
 {
-	CPlayer* p = (CPlayer*) pContext;
-	p->getposition();
-	for (int j = 0; j < 100; j++)
+	for (int j = 0; j < m_nObjects; j++)
 	{
+		XMFLOAT3 look = Vector3::Normalize(Vector3::Subtract(player->GetPosition(), m_ppObjects[j]->GetPosition()));
+		XMFLOAT3 up{ 0,1,0 };
+		XMFLOAT3 right = Vector3::CrossProduct(up, look);
+
+		if (m_ppObjects[j])
+			m_ppObjects[j]->SetWorldMatrix(look, up, right);
 		m_ppObjects[j]->Animate(fTimeElapsed);
-		m_ppObjects[j]->SetWorldMatrix()
 	}
 }
 

@@ -295,28 +295,17 @@ XMFLOAT3 CGameObject::GetRight()
 	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
 }
 
-void CGameObject::SetWorldMatrix(XMFLOAT3 pos, XMFLOAT3 look, XMFLOAT3 up, XMFLOAT3 right)
+void CGameObject::SetWorldMatrix(XMFLOAT3 look, XMFLOAT3 up, XMFLOAT3 right)
 {
-	if (pos) {
-		m_xmf4x4World._41 = pos.x;
-		m_xmf4x4World._42 = pos.y;
-		m_xmf4x4World._43 = pos.z;
-	}
-	if (look) {
-		m_xmf4x4World._31 = look.x;
-		m_xmf4x4World._32 = look.y;
-		m_xmf4x4World._33 = look.z;
-	}
-	if (up) {
-		m_xmf4x4World._21 = up.x;
-		m_xmf4x4World._22 = up.y;
-		m_xmf4x4World._23 = up.z;
-	}
-	if (right) {
-		m_xmf4x4World._11 = right.x;
-		m_xmf4x4World._12 = right.y;
-		m_xmf4x4World._13 = right.z;
-	}
+	m_xmf4x4World._31 = look.x;
+	m_xmf4x4World._32 = look.y;
+	m_xmf4x4World._33 = look.z;
+	m_xmf4x4World._21 = up.x;
+	m_xmf4x4World._22 = up.y;
+	m_xmf4x4World._23 = up.z;
+	m_xmf4x4World._11 = right.x;
+	m_xmf4x4World._12 = right.y;
+	m_xmf4x4World._13 = right.z;
 }
 
 void CGameObject::MoveStrafe(float fDistance)
@@ -432,8 +421,8 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 	CTexture *pTerrainTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0);
 
-	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Terrain/Base_Texture.dds", 0);
-	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/Terrain/Detail_Texture_7.dds", 1);
+	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/Base_Texture.dds", 0);
+	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/Detail_Texture_7.dds", 1);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
 
@@ -480,12 +469,12 @@ CSkyBox::CSkyBox(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 	CTexture *pSkyBoxTexture = new CTexture(6, RESOURCE_TEXTURE2D, 0);
 
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Front_0.dds", 0);
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Back_0.dds", 1);
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Left_0.dds", 2);
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Right_0.dds", 3);
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Top_0.dds", 4);
-	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"../Assets/Image/SkyBox/SkyBox_Bottom_0.dds", 5);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Front_0.dds", 0);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Back_0.dds", 1);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Left_0.dds", 2);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Right_0.dds", 3);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Top_0.dds", 4);
+	pSkyBoxTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/SkyBox/SkyBox_Bottom_0.dds", 5);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
 
@@ -544,21 +533,6 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-void CBillBoard::Reposition(XMFLOAT3 playerpos)
-{
-	XMFLOAT3 look = Vector3::Normalize(Vector3::Subtract(playerpos, GetPosition()));
-	XMFLOAT3 right = Vector3::CrossProduct(XMFLOAT3(0, 1, 0), look);
-	
-	m_xmf4x4World._41 = look.x;
-	m_xmf4x4World._42 = look.y;
-	m_xmf4x4World._43 = look.z;
-
-	m_xmf4x4World._11 = right.x;
-	m_xmf4x4World._12 = right.y;
-	m_xmf4x4World._13 = right.z;
-}
 
 void CBillBoard::Animate(float fTimeElapsed)
 {

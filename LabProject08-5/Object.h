@@ -158,7 +158,7 @@ public:
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
 
-	void SetWorldMatrix(XMFLOAT3 pos, XMFLOAT3 look, XMFLOAT3 up, XMFLOAT3 right);
+	void SetWorldMatrix(XMFLOAT3 look, XMFLOAT3 up, XMFLOAT3 right);
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
