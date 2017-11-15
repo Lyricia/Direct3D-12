@@ -29,7 +29,7 @@ public:
 	void ReleaseUploadBuffers();
 
 	CHeightMapTerrain *GetTerrain() { return(m_pTerrain); }
-	void SetPlayer(CPlayer* player) { m_Player = player; }
+	void SetCamera(CCamera* cam) { m_Camera = cam; }
 
 protected:
 	CShader						**m_ppShaders = NULL;
@@ -38,7 +38,7 @@ protected:
 	CHeightMapTerrain			*m_pTerrain = NULL;
 	CSkyBox						*m_pSkyBox = NULL;
 
-	CPlayer						*m_Player = NULL;
+	CCamera						*m_Camera = NULL;
 
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 };

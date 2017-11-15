@@ -417,9 +417,9 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	int yObjects = 1;
 	int zObjects = int(fTerrainLength / fzPitch);
 
-	xObjects=10;
+	xObjects=100;
 	yObjects=1;
-	zObjects=10;
+	zObjects=100;
 
 	m_nObjects = (xObjects * yObjects * zObjects);
 
@@ -500,11 +500,11 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CObjectsShader::AnimateObjects(float fTimeElapsed, CPlayer * player)
+void CObjectsShader::AnimateObjects(float fTimeElapsed, CCamera * Camera)
 {
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		XMFLOAT3 look = Vector3::Normalize(Vector3::Subtract(player->GetPosition(), m_ppObjects[j]->GetPosition()));
+		XMFLOAT3 look = Vector3::Normalize(Vector3::Subtract(Camera->GetPosition(), m_ppObjects[j]->GetPosition()));
 		XMFLOAT3 up{ 0,1,0 };
 		XMFLOAT3 right = Vector3::CrossProduct(up, look);
 

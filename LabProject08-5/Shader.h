@@ -43,7 +43,7 @@ public:
 
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext=NULL) { }
 	virtual void AnimateObjects(float fTimeElapsed) { }
-	virtual void AnimateObjects(float fTimeElapsed, CPlayer* player = NULL) {}
+	virtual void AnimateObjects(float fTimeElapsed, CCamera * Camera = NULL) {}
 	virtual void ReleaseObjects() { }
 	virtual void ReleaseUploadBuffers();
 
@@ -114,7 +114,7 @@ public:
 
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext=NULL);
 	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void AnimateObjects(float fTimeElapsed, CPlayer* player = NULL);
+	virtual void AnimateObjects(float fTimeElapsed, CCamera * Camera = NULL);
 	virtual void ReleaseObjects();
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);

@@ -204,7 +204,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_ppShaders[i]->AnimateObjects(fTimeElapsed, m_Player);
+		m_ppShaders[i]->AnimateObjects(fTimeElapsed, m_Camera);
 	}
 }
 
