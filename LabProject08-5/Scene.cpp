@@ -36,6 +36,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
+
+	//CInstancingShader *pInstanceObjectShader = new CInstancingShader();
+	//pInstanceObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pInstanceObjectShader->BuildObjects(pd3dDevice, pd3dCommandList);
+	//m_ppShaders[1] = pInstanceObjectShader;
 }
 
 void CScene::ReleaseObjects()

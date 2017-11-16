@@ -334,6 +334,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_F2:
 				case VK_F3:
 					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+					m_pScene->SetCamera(m_pCamera);
 //					m_pCamera->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
 					break;
 				case VK_F9:
