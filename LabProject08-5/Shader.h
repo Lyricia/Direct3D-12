@@ -174,7 +174,7 @@ public:
 
 struct VS_VB_INSTANCE
 {
-	XMFLOAT4X4 m_xmf4x4Transform;
+	XMFLOAT4X4		m_xmf4x4Transform;
 };
 
 class CInstancingShader : public CObjectsShader
@@ -200,7 +200,7 @@ public:
 protected:
 	//인스턴스 정점 버퍼와 정점 버퍼 뷰이다.
 	ID3D12Resource				*m_pd3dcbGameObjects = NULL;
-	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObjects = NULL;
+	VS_VB_INSTANCE				*m_pcbMappedGameObjects = NULL;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dInstancingBufferView;
 
 };

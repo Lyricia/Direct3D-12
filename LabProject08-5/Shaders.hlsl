@@ -143,8 +143,8 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) 
 		cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
 */
 	float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
-	//if(cColor.a < 0.1)
-    //    discard;
+	if(cColor.a < 0.1)
+        discard;
 	
 	return(cColor);
 }
@@ -212,7 +212,7 @@ struct VS_INSTANCING_INPUT
 {
     float3 position : POSITION;
     float2 uv : TEXCOORD;
-    //float4x4 mtxTransform : WORLDMATRIX;
+    float4x4 mtxTransform : WORLDMATRIX;
     //float4 instanceColor : INSTANCECOLOR;
 };
 
@@ -222,19 +222,21 @@ struct VS_INSTANCING_OUTPUT
     float2 uv : TEXCOORD;
 };
 
-StructuredBuffer<VS_INSTANCING_INPUT> gGameObjectInfos : register(t9);
+//StructuredBuffer<VS_INSTANCING_INPUT> gGameObjectInfos : register(t9);
 
-VS_INSTANCING_OUTPUT VSInstancing(uint nInstanceID : SV_InstanceID)
+VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input, uint nInstanceID : SV_InstanceID)
 {
     VS_INSTANCING_OUTPUT output;
-    output.position = mul(mul(mul(float4(gGameObjectInfos[nInstanceID].position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-    output.uv = gGameObjectInfos[nInstanceID].uv;
+    output.position = mul(mul(mul(float4(input.position, 1.0f), input.mtxTransform), gmtxView), gmtxProjection);
+    output.uv = input.uv;
+
     return (output);
 }
 
 float4 PSInstancing(VS_INSTANCING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
     float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
-
+    if (cColor.a < 0.1)
+        discard;
     return (cColor);
 }

@@ -240,7 +240,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	}
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
-	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, m_pd3dcbGameObject->GetGPUVirtualAddress());
 
 	if (m_ppMeshes)
 	{
@@ -269,9 +268,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * 
 			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
-
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
-	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, d3dInstancingBufferView.BufferLocation);
 
 	if (m_ppMeshes)
 	{
@@ -583,8 +579,6 @@ void CBillBoard::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * p
 			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
-
-	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, d3dInstancingBufferView.BufferLocation);
 
 	if (m_ppMeshes)
 	{
