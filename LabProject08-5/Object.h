@@ -210,7 +210,7 @@ public:
 class CBillBoard : public CGameObject
 {
 public:
-	CBillBoard(int nMeshes = 1) {};
+	CBillBoard(int nMeshes = 1) :CGameObject(nMeshes) {};
 	virtual ~CBillBoard() {};
 
 private:
