@@ -32,15 +32,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
-	CObjectsShader *pObjectShader = new CObjectsShader();
-	pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
-	m_ppShaders[0] = pObjectShader;
+	//CObjectsShader *pObjectShader = new CObjectsShader();
+	//pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
+	//m_ppShaders[0] = pObjectShader;
 
-	//CInstancingShader *pInstanceObjectShader = new CInstancingShader();
-	//pInstanceObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//pInstanceObjectShader->BuildObjects(pd3dDevice, pd3dCommandList);
-	//m_ppShaders[1] = pInstanceObjectShader;
+	CInstancingShader *pInstanceObjectShader = new CInstancingShader();
+	pInstanceObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pInstanceObjectShader->BuildObjects(pd3dDevice, pd3dCommandList);
+	m_ppShaders[0] = pInstanceObjectShader;
 }
 
 void CScene::ReleaseObjects()
@@ -90,23 +90,23 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[2].NumDescriptors = 1;
-	pd3dDescriptorRanges[2].BaseShaderRegister = 6; //t4: gtxtTerrainBaseTexture
+	pd3dDescriptorRanges[2].BaseShaderRegister = 6; //t6: gtxtTerrainBaseTexture
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[3].NumDescriptors = 1;
-	pd3dDescriptorRanges[3].BaseShaderRegister = 7; //t5: gtxtTerrainDetailTexture
+	pd3dDescriptorRanges[3].BaseShaderRegister = 7; //t7: gtxtTerrainDetailTexture
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[4].NumDescriptors = 1;
-	pd3dDescriptorRanges[4].BaseShaderRegister = 8; //t6: gtxtSkyBoxTexture
+	pd3dDescriptorRanges[4].BaseShaderRegister = 8; //t8: gtxtSkyBoxTexture
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Player
@@ -142,6 +142,11 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4];
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[7].Descriptor.ShaderRegister = 9; //Instance Object
+	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
 

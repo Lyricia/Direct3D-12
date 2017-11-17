@@ -240,6 +240,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	}
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, m_pd3dcbGameObject->GetGPUVirtualAddress());
 
 	if (m_ppMeshes)
 	{
@@ -269,7 +270,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * 
 		}
 	}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
+	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, d3dInstancingBufferView.BufferLocation);
 
 	if (m_ppMeshes)
 	{
@@ -389,11 +391,6 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
-}
-
-void CRotatingObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,3 +564,34 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 void CBillBoard::Animate(float fTimeElapsed)
 {
 }
+
+void CBillBoard::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+{
+	OnPrepareRender();
+
+	if (m_pMaterial)
+	{
+		if (m_pMaterial->m_pShader)
+		{
+			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+			m_pMaterial->m_pShader->UpdateShaderVariables(pd3dCommandList);
+
+			UpdateShaderVariables(pd3dCommandList);
+		}
+		if (m_pMaterial->m_pTexture)
+		{
+			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
+
+	//pd3dCommandList->SetGraphicsRootShaderResourceView(7, d3dInstancingBufferView.BufferLocation);
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, nInstances, d3dInstancingBufferView);
+		}
+	}
+}
+ 

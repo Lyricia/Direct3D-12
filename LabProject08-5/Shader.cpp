@@ -70,7 +70,7 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 	d3dRasterizerDesc.DepthBias = 0;
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
@@ -653,7 +653,7 @@ void CSkyBoxShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *
 
 D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 6;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	//정점 정보를 위한 입력 원소이다.
@@ -661,11 +661,11 @@ D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
 	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	//인스턴싱 정보를 위한 입력 원소이다.
-	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-	pd3dInputElementDescs[6] = { "INSTANCECOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,		64, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,	D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16,	D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32,	D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48,	D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	//pd3dInputElementDescs[6] = { "INSTANCECOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,	64, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -697,7 +697,7 @@ void CInstancingShader::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12Gr
 		pd3dDevice, 
 		pd3dCommandList, 
 		NULL,
-		sizeof(VS_VB_INSTANCE) * m_nObjects, 
+		sizeof(VS_VB_INSTANCE) * m_nObjects,
 		D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, 
 		NULL
@@ -710,15 +710,15 @@ void CInstancingShader::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12Gr
 	m_d3dInstancingBufferView.BufferLocation = m_pd3dcbGameObjects->GetGPUVirtualAddress();
 	m_d3dInstancingBufferView.StrideInBytes = sizeof(VS_VB_INSTANCE);
 	m_d3dInstancingBufferView.SizeInBytes = sizeof(VS_VB_INSTANCE) * m_nObjects;
+
 }
 
 void CInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRootShaderResourceView(2, m_pd3dcbGameObjects->GetGPUVirtualAddress());
+	pd3dCommandList->SetGraphicsRootShaderResourceView(7, m_pd3dcbGameObjects->GetGPUVirtualAddress());
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		m_pcbMappedGameObjects[j].m_xmcColor = (j % 2) ? XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f) : XMFLOAT4(0.0f, 0.0f, 0.5f, 0.0f);
 		XMStoreFloat4x4(&m_pcbMappedGameObjects[j].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
 	}
 }
@@ -732,32 +732,34 @@ void CInstancingShader::ReleaseShaderVariables()
 
 void CInstancingShader::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList)
 {
-	int xObjects = 10, yObjects = 10, zObjects = 10, i = 0;
-	m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+	int xObjects = 10, yObjects = 1, zObjects = 10, i = 0;
+	m_nObjects = xObjects * yObjects * zObjects;
 	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, m_nObjects, 1);
 
 	float fxPitch = 12.0f * 2.5f;
 	float fyPitch = 12.0f * 2.5f;
 	float fzPitch = 12.0f * 2.5f;
 	CRotatingObject *pRotatingObject = NULL;
-	for (int x = -xObjects; x <= xObjects; x++)
+	CBillBoard *pBillBoard = NULL;
+	for (int x = 0; x < xObjects; x++)
 	{
-		for (int y = -yObjects; y <= yObjects; y++)
+		for (int y = 0; y < yObjects; y++)
 		{
-			for (int z = -zObjects; z <= zObjects; z++)
+			for (int z = 0; z < zObjects; z++)
 			{
-				pRotatingObject = new CRotatingObject();
-				pRotatingObject->SetPosition(fxPitch*x, fyPitch*y, fzPitch*z);
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(10.0f*(i % 10));
-				m_ppObjects[i++] = pRotatingObject;
+				pBillBoard = new CBillBoard(1);
+				pBillBoard->SetPosition(0,200,0);
+				m_ppObjects[i++] = pBillBoard;
 			}
 		}
 	}
 
 	//인스턴싱을 사용하여 렌더링하기 위하여 하나의 게임 객체만 메쉬를 가진다.
-	CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-	m_ppObjects[0]->SetMesh(0, pCubeMesh);
+	CTexturedRectMesh *pPlane = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 100, 100, 0);
+	//CCubeMeshDiffused *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 100.0f, 100.f, 100.0f);
+	m_ppObjects[0]->SetMesh(0, pPlane);
 
 	//인스턴싱을 위한 정점 버퍼와 뷰를 생성한다.
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -769,8 +771,10 @@ void CInstancingShader::ReleaseObjects()
 
 void CInstancingShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
-	CObjectsShader::Render(pd3dCommandList, pCamera);
-
+	//CObjectsShader::Render(pd3dCommandList, pCamera);
+	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
+	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	 
 	//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다.
 	UpdateShaderVariables(pd3dCommandList);
 

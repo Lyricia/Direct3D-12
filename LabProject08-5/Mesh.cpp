@@ -598,9 +598,3 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 CTexturedRectMesh::~CTexturedRectMesh()
 {
 }
-
-void CTexturedRectMesh::Render(ID3D12GraphicsCommandList * pd3dCommandList, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
-{
-
-}
-
