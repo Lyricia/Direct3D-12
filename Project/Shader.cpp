@@ -703,3 +703,150 @@ void CTerrainShader::UpdateShaderVariables(ID3D12GraphicsCommandList * pd3dComma
 
 	pbMappedcbGameObject->m_nMaterial = m_ppObjects[0]->m_pMaterial->m_nReflection;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+D3D12_INPUT_LAYOUT_DESC CInstancingShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 6;
+	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	//정점 정보를 위한 입력 원소이다.
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12,	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	pd3dInputElementDescs[2] = { "WORLDMATRIX", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[3] = { "WORLDMATRIX", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[4] = { "WORLDMATRIX", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+	pd3dInputElementDescs[5] = { "WORLDMATRIX", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48,		D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CInstancingShader::CreateVertexShader(ID3DBlob **ppd3dShaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSInstancing", "vs_5_1", ppd3dShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CInstancingShader::CreatePixelShader(ID3DBlob **ppd3dShaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSInstancing", "ps_5_1", ppd3dShaderBlob));
+}
+
+void CInstancingShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+}
+
+void CInstancingShader::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+{
+	//인스턴스 정보를 저장할 정점 버퍼를 업로드 힙 유형으로 생성한다.
+	m_pd3dcbGameObjects = ::CreateBufferResource(
+		pd3dDevice,
+		pd3dCommandList,
+		NULL,
+		sizeof(VS_VB_INSTANCE) * m_nObjects,
+		D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		NULL
+	);
+
+	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다.
+	m_pd3dcbGameObjects->Map(0, NULL, (void **)&m_pcbMappedGameObjects);
+
+	//정점 버퍼에 대한 뷰를 생성한다.
+	m_d3dInstancingBufferView.BufferLocation = m_pd3dcbGameObjects->GetGPUVirtualAddress();
+	m_d3dInstancingBufferView.StrideInBytes = sizeof(VS_VB_INSTANCE);
+	m_d3dInstancingBufferView.SizeInBytes = sizeof(VS_VB_INSTANCE) * m_nObjects;
+
+}
+
+void CInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRootShaderResourceView(7, m_pd3dcbGameObjects->GetGPUVirtualAddress());
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		XMStoreFloat4x4(&m_pcbMappedGameObjects[j].m_xmf4x4Transform, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+	}
+}
+
+void CInstancingShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObjects) m_pd3dcbGameObjects->Unmap(0, NULL);
+	if (m_pd3dcbGameObjects) m_pd3dcbGameObjects->Release();
+}
+
+void CInstancingShader::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, void *pContext)
+{
+	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
+
+	int treexObjects = 150, treezObjects = 150, i = 0;
+	m_nObjects = treexObjects * treezObjects;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CTexture *pTexture = new CTexture(6, RESOURCE_TEXTURE2D_ARRAY, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Tree23.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Flowers/Flower06.dds", 1);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Flowers/Flower07.dds", 2);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Flowers/Flower09.dds", 3);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Grasses/Grass03.dds", 4);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Grasses/Grass05.dds", 5);
+
+	CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, 0, 6);
+	CreateShaderResourceViews(pd3dDevice, pd3dCommandList, pTexture, 3, false);
+
+	CMaterial *pTreeMaterial = new CMaterial();
+	pTreeMaterial->SetTexture(pTexture);
+
+	float fPitch = pTerrain->GetWidth() / treexObjects;
+	float xPos, zPos;
+	CBillBoard *pBillBoard = NULL;
+	for (int x = 0; x < treexObjects; x++)
+	{
+		for (int z = 0; z < treezObjects; z++)
+		{
+			pBillBoard = new CBillBoard(1);
+			xPos = fPitch*x + rand() % 10;
+			zPos = fPitch*z + rand() % 10;
+			xPos = fPitch*x + rand() % 20;
+			zPos = fPitch*z + rand() % 20;
+			if (zPos > 2040)
+				zPos = pTerrain->GetWidth() - 30;
+			float fHeight = pTerrain->GetHeight(xPos, zPos) + 14;
+			pBillBoard->SetPosition(xPos, fHeight, zPos);
+			m_ppObjects[i++] = pBillBoard;
+		}
+	}
+
+	//인스턴싱을 사용하여 렌더링하기 위하여 하나의 게임 객체만 메쉬를 가진다.
+	CTexturedRectMesh *pPlane = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30, 30, 0);
+	m_ppObjects[0]->SetMesh(0, pPlane);
+	m_ppObjects[0]->SetMaterial(pTreeMaterial);
+
+	//인스턴싱을 위한 정점 버퍼와 뷰를 생성한다.
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CInstancingShader::ReleaseObjects()
+{
+}
+
+void CInstancingShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+{
+	//CObjectsShader::Render(pd3dCommandList, pCamera);
+	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
+	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+
+	//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다.
+	UpdateShaderVariables(pd3dCommandList);
+
+	//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다.
+	m_ppObjects[0]->Render(pd3dCommandList, pCamera, m_nObjects, m_d3dInstancingBufferView);
+}

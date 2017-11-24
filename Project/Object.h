@@ -140,6 +140,23 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
 
+class CBillBoard : public CGameObject
+{
+public:
+	CBillBoard(int nMeshes = 1) :CGameObject(nMeshes) {};
+	virtual ~CBillBoard() {};
+
+private:
+
+public:
+	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
 class CRevolvingObject : public CGameObject
 {
