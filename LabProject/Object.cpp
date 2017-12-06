@@ -444,8 +444,8 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 	CTexture *pTerrainTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0);
 
-	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/Base_Texture.dds", 0);
-	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/Detail_Texture_7.dds", 1);
+	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/Snow_Tex.dds", 0);
+	pTerrainTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Terrain/rock3.dds", 1);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 

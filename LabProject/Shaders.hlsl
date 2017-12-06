@@ -160,15 +160,18 @@ struct VS_TERRAIN_INPUT
 	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
+    float3 normal : NORMAL;
 };
 
 
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+    float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
+    float3 normal : NORMAL;
+    float height : HEIGHT;
 };
 
 VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
@@ -178,6 +181,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gcbGameObjectInfo.mtxWorld), gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
 #else
+    output.height = input.position.y;
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 #endif
 	output.color = input.color;
@@ -189,11 +193,17 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
+    float4 cColor;
+    float colorweight;
+
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
-	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 
-	return(cColor);
+    colorweight = abs(pow(((input.height - 85) / 100),3));
+   
+    cColor = cBaseTexColor * colorweight + cDetailTexColor * (1 - colorweight);
+
+    return (cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

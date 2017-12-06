@@ -407,7 +407,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 {
 	m_nVertices = nWidth * nLength;
 //	m_nStride = sizeof(CTexturedVertex);
-	m_nStride = sizeof(CDiffused2TexturedVertex);
+	m_nStride = sizeof(CIlluminate2TexturedVertex);
 	m_nOffset = 0;
 	m_nSlot = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
@@ -417,7 +417,8 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 	m_xmf3Scale = xmf3Scale;
 
 //	CTexturedVertex *pVertices = new CTexturedVertex[m_nVertices];
-	CDiffused2TexturedVertex *pVertices = new CDiffused2TexturedVertex[m_nVertices];
+//	CDiffused2TexturedVertex *pVertices = new CDiffused2TexturedVertex[m_nVertices];
+	CIlluminate2TexturedVertex *pVertices = new CIlluminate2TexturedVertex[m_nVertices];
 
 	CHeightMapImage *pHeightMapImage = (CHeightMapImage *)pContext;
 	int cxHeightMap = pHeightMapImage->GetHeightMapWidth();
@@ -431,8 +432,9 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 			fHeight = OnGetHeight(x, z, pContext);
 			pVertices[i].m_xmf3Position = XMFLOAT3((x*m_xmf3Scale.x), fHeight, (z*m_xmf3Scale.z));
 			pVertices[i].m_xmf4Diffuse = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
-			pVertices[i].m_xmf2TexCoord0 = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
-			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x*0.5f), float(z) / float(m_xmf3Scale.z*0.5f));
+			pVertices[i].m_xmf2TexCoord0 = XMFLOAT2(float(x) / float(512 / 8), float(czHeightMap - 1 - z) / float(512 / 8));
+			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x*2), float(z) / float(m_xmf3Scale.z * 2));
+			pVertices[i].m_xmf3Normal = pHeightMapImage->GetHeightMapNormal(x, z);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
