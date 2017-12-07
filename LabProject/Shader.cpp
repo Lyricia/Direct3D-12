@@ -404,78 +404,7 @@ void CObjectsShader::ReleaseShaderVariables()
 
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext)
 {
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 
-	float fxPitch = 50.f;
-	float fyPitch = 50.f;
-	float fzPitch = 50.f;
-
-	float fTerrainWidth = pTerrain->GetWidth();
-	float fTerrainLength = pTerrain->GetLength();
-
-	int xObjects = int(fTerrainWidth / fxPitch);
-	int yObjects = 1;
-	int zObjects = int(fTerrainLength / fzPitch);
-
-	xObjects=100;
-	yObjects=1;
-	zObjects=100;
-
-	m_nObjects = (xObjects * yObjects * zObjects);
-
-	CTexture *pTexture = new CTexture(6, RESOURCE_TEXTURE2D_ARRAY, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Tree24.dds", 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/rocks2.dds", 1);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick02.dds", 2);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick01.dds", 3);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Stone.dds", 4);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/brick01.dds", 5);
-
-	CTexture *pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-
-	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/Tree24.DDS", 0);
-
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
-
-	CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, m_nObjects, 6);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	CreateConstantBufferViews(pd3dDevice, pd3dCommandList, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	CreateShaderResourceViews(pd3dDevice, pd3dCommandList, pTexture2, 3, false);
-
-#ifdef _WITH_BATCH_MATERIAL
-	m_pMaterial = new CMaterial();
-	m_pMaterial->SetTexture(pTexture);
-#else
-	CMaterial *pCubeMaterial = new CMaterial();
-	pCubeMaterial->SetTexture(pTexture2);
-#endif
-	
-	CTexturedRectMesh *pTexRect = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50, 50, 0);
-
-	m_ppObjects = new CGameObject*[m_nObjects];
-
-	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	CBillBoard *pTree = NULL;
-	for (int i = 0, x = 0; x < xObjects; x++)
-	{
-		for (int z = 0; z < zObjects; z++)
-		{
-			for (int y = 0; y < yObjects; y++)
-			{
-				pTree = new CBillBoard(1);
-				pTree->SetMesh(0, pTexRect);
-#ifndef _WITH_BATCH_MATERIAL
-				pTree->SetMaterial(pCubeMaterial);
-#endif
-				float xPosition = 500 + fxPitch*x;
-				float zPosition = 500 + fzPitch*z;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pTree->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) +25.f, zPosition);
-				pTree->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-				m_ppObjects[i++] = pTree;
-			}
-		}
-	}
 }
 
 void CObjectsShader::ReleaseObjects()
@@ -537,7 +466,7 @@ CTerrainShader::~CTerrainShader()
 
 D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 5;
+	UINT nInputElementDescs = 6;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -545,6 +474,7 @@ D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[3] = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[4] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[5] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 56, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;

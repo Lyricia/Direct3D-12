@@ -38,6 +38,9 @@ cbuffer cbGameObjectInfo : register(b2)
 };
 #endif
 
+//#include "Light.hlsl"
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 struct VS_DIFFUSED_INPUT
@@ -153,6 +156,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) 
 //
 Texture2D gtxtTerrainBaseTexture : register(t6);
 Texture2D gtxtTerrainDetailTexture : register(t7);
+Texture2D gtxtTerrainDetailNormalTexture : register(t8);
 
 struct VS_TERRAIN_INPUT
 {
@@ -161,16 +165,20 @@ struct VS_TERRAIN_INPUT
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
 };
 
 
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
+    float3 positionW : POSITION;
     float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
-    float3 normal : NORMAL;
+    float3 normalW : NORMAL;
+    float3 tangentW : TANGENT;
+
     float height : HEIGHT;
 };
 
@@ -182,12 +190,14 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gcbGameObjectInfo.mtxWorld), gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
 #else
     output.height = input.position.y;
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+    output.positionW = mul(float4(input.position, 1.0f), gmtxWorld);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 #endif
 	output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
-
+    output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+    output.tangentW = mul(input.tangent, (float3x3) gmtxWorld);
 	return(output);
 }
 
@@ -198,17 +208,31 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
-
-    colorweight = abs(pow(((input.height - 85) / 100),3));
+    float3 normal = gtxtTerrainDetailNormalTexture.Sample(gWrapSamplerState, input.uv1);
+    cDetailTexColor = cDetailTexColor * 0.8;
+    
+    colorweight = dot(input.normalW, float3(0, 1, 0));
+    //colorweight = pow(colorweight,1.5);
+    //colorweight = abs(pow(((input.height - 100) / 100) , 3));
    
     cColor = cBaseTexColor * colorweight + cDetailTexColor * (1 - colorweight);
+
+    float3 N = normalize(input.normalW);
+    float3 T = normalize(input.tangentW - dot(input.tangentW, N) * N);
+    float3 B = cross(N, T);
+    float3x3 TBN = float3x3(T, B, N);
+
+    normal = 2.0f * normal - 1.0f;
+    float3 normalW = mul(normal, TBN);
+
+   //cColor = float4(normalW, cColor.a);
 
     return (cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-Texture2D gtxtSkyBox : register(t8);
+Texture2D gtxtSkyBox : register(t10);
 
 float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {

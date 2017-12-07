@@ -112,7 +112,7 @@ public:
 	XMFLOAT2						m_xmf2TexCoord1;
 	
 	XMFLOAT3						m_xmf3Normal;
-
+	XMFLOAT3						m_xmf3Tangent;
 public:
 	CIlluminate2TexturedVertex() {
 		m_xmf3Position = m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -236,6 +236,7 @@ public:
 
 	float GetHeight(float x, float z, bool bReverseQuad = false);
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
+	XMFLOAT3 GetHeightMapTangent(int x, int z);
 	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
 
 	BYTE *GetHeightMapPixels() { return(m_pHeightMapPixels); }

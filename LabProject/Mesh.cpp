@@ -363,6 +363,24 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	return(xmf3Normal);
 }
 
+XMFLOAT3 CHeightMapImage::GetHeightMapTangent(int x, int z)
+{
+	if ((x < 0.0f) || (z < 0.0f) || (x >= m_nWidth) || (z >= m_nLength)) return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	int nHeightMapIndex = x + (z * m_nWidth);
+	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
+	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
+	float y1 = (float)m_pHeightMapPixels[nHeightMapIndex] * m_xmf3Scale.y;
+	float y2 = (float)m_pHeightMapPixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
+	float y3 = (float)m_pHeightMapPixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
+	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
+	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
+	
+	XMFLOAT3 xmf3Tangent = Vector3::ScalarProduct(xmf3Edge2, 1.f / m_xmf3Scale.x);
+	
+	return(xmf3Tangent);
+}
+
 #define _WITH_APPROXIMATE_OPPOSITE_CORNER
 
 float CHeightMapImage::GetHeight(float fx, float fz, bool bReverseQuad)
@@ -433,8 +451,9 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 			pVertices[i].m_xmf3Position = XMFLOAT3((x*m_xmf3Scale.x), fHeight, (z*m_xmf3Scale.z));
 			pVertices[i].m_xmf4Diffuse = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
 			pVertices[i].m_xmf2TexCoord0 = XMFLOAT2(float(x) / float(512 / 8), float(czHeightMap - 1 - z) / float(512 / 8));
-			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x*2), float(z) / float(m_xmf3Scale.z * 2));
+			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x), float(z) / float(m_xmf3Scale.z));
 			pVertices[i].m_xmf3Normal = pHeightMapImage->GetHeightMapNormal(x, z);
+			pVertices[i].m_xmf3Tangent = pHeightMapImage->GetHeightMapTangent(x, z);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
