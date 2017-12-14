@@ -82,7 +82,7 @@ protected:
 
 	CGameObject					**m_ppObjects = NULL;
 	int							m_nObjects = 0;
-
+	
 	CShader						**m_ppShaders = NULL;
 	int							m_nShaders = 0;
 
@@ -101,4 +101,5 @@ protected:
 	CSkyBox						*m_pSkyBox = NULL;
 
 	CBillBoardShader			*m_pBillBoard = NULL;
+	CMissleShader				*m_pMissle = NULL;
 };

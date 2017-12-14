@@ -836,3 +836,76 @@ void CBillBoardShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCame
 
 	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+CMissleShader::CMissleShader()
+{
+}
+
+CMissleShader::~CMissleShader()
+{
+}
+
+void CMissleShader::BuildObjects(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, void * pContext)
+{
+	int xObjects = 10, zObjects = 10, i = 0;
+
+	m_nObjects = (xObjects * 2 + 1) * (zObjects * 2 + 1);
+	CHeightMapTerrain *terrain = (CHeightMapTerrain*)pContext;
+
+	CTexture *pTexture = new CTexture(1, RESOURCE_TEXTURE2DARRAY, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Resource/Miscellaneous/StonesArray.dds", 0);
+
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+
+	CreateCbvAndSrvDescriptorHeaps(pd3dDevice, pd3dCommandList, m_nObjects, 1);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateConstantBufferViews(pd3dDevice, pd3dCommandList, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	CreateShaderResourceViews(pd3dDevice, pd3dCommandList, pTexture, 5, false);
+
+#ifdef _WITH_BATCH_MATERIAL
+	m_pMaterial = new CMaterial();
+	m_pMaterial->SetTexture(pTexture);
+	m_pMaterial->SetReflection(0);
+#else
+	CMaterial *pCubeMaterial = new CMaterial();
+	pCubeMaterial->SetTexture(pTexture);
+	pCubeMaterial->SetReflection(1);
+#endif
+
+	CCubeMeshIlluminatedTextured *pCubeMesh = new CCubeMeshIlluminatedTextured(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	float fxPitch = 12.0f * 2.5f, fyPitch = 12.0f * 2.5f, fzPitch = 12.0f * 2.5f;
+
+	CRotatingObject *pRotatingObject = NULL;
+	for (int x = -xObjects; x <= xObjects; x++)
+	{
+		for (int z = -zObjects; z <= zObjects; z++)
+		{
+			pRotatingObject = new CRotatingObject(1);
+			pRotatingObject->SetMesh(0, pCubeMesh);
+#ifndef _WITH_BATCH_MATERIAL
+			pRotatingObject->SetMaterial(pCubeMaterial);
+#endif
+			float y = terrain->GetHeight(x, z);
+			pRotatingObject->SetPosition(fxPitch*x, y, fzPitch*z);
+			pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+			pRotatingObject->SetRotationSpeed(10.0f * (i % 10));
+			pRotatingObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+			m_ppObjects[i++] = pRotatingObject;
+		}
+	}
+}
+
+void CMissleShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+}

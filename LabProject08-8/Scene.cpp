@@ -129,6 +129,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
+	
+
 
 #ifdef _WITH_GUNSHIP_MODEL
 	m_ppObjects[0] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -151,6 +153,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pBillBoard = new CBillBoardShader();
 	m_pBillBoard->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pBillBoard->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
+
+	m_pMissle = new CMissleShader();
+	m_pMissle->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pMissle->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 
 	BuildLightsAndMaterials();
 	
@@ -182,6 +188,8 @@ void CScene::ReleaseObjects()
 
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
+	if (m_pMissle) delete m_pMissle;
+	if (m_pBillBoard) delete m_pBillBoard;
 
 	if (m_pLights) delete m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
@@ -380,6 +388,20 @@ bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	switch (nMessageID)
+	{
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_SPACE:
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
 	return(false);
 }
 
@@ -419,6 +441,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pBillBoard) m_pBillBoard->Render(pd3dCommandList, pCamera);
+	if (m_pMissle) m_pMissle->Render(pd3dCommandList, pCamera);
+
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 

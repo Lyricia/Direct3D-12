@@ -187,6 +187,34 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CMissleShader : public CObjectsShader
+{
+public:
+	CMissleShader();
+	virtual ~CMissleShader();
+
+	CGameObject* GetObjectList() { return *m_ppObjects; }
+
+	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pContext = NULL);
+
+	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature);
+
+protected:
+	CGameObject						**m_ppObjects = 0;
+	int								m_nObjects = 0;
+	int								m_ActiveObjectIdx = 0;
+
+	ID3D12Resource					*m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObjects = NULL;
+
+#ifdef _WITH_BATCH_MATERIAL
+	CMaterial						*m_pMaterial = NULL;
+#endif
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 class CSkyBoxShader : public CTexturedShader
 {
 public:
