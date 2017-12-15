@@ -23,6 +23,12 @@ protected:
 	XMFLOAT3						m_xmf3Up;
 	XMFLOAT3						m_xmf3Look;
 
+	XMFLOAT3						m_tempPosition;
+	XMFLOAT3						m_tempRight;
+	XMFLOAT3						m_tempUp;
+	XMFLOAT3						m_tempLook;
+	
+
 	float           				m_fPitch;
 	float           				m_fRoll;
 	float           				m_fYaw;
@@ -100,6 +106,9 @@ public:
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
 	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
+
+	void RevertOrthogonal();
+	void CameraOrthogonalize(XMFLOAT2 size);
 };
 
 class CSpaceShipCamera : public CCamera

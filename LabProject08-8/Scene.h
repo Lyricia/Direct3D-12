@@ -81,7 +81,9 @@ protected:
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 
 	CGameObject					**m_ppObjects = NULL;
+	CMissle						**m_ppMissle = NULL;
 	int							m_nObjects = 0;
+	int							m_nMissles = 0;
 	
 	CShader						**m_ppShaders = NULL;
 	int							m_nShaders = 0;
@@ -100,6 +102,8 @@ protected:
 	CHeightMapTerrain			*m_pTerrain = NULL;
 	CSkyBox						*m_pSkyBox = NULL;
 
+	CParticleBillBoard			*m_pParticleBillBoard = NULL;
 	CBillBoardShader			*m_pBillBoard = NULL;
 	CMissleShader				*m_pMissle = NULL;
+	CMinimapShader				*m_pMinimap = NULL;
 };

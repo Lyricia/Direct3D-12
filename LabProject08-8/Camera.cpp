@@ -71,6 +71,33 @@ void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 	m_d3dScissorRect.bottom = yBottom;
 }
 
+void CCamera::RevertOrthogonal()
+{
+	m_xmf3Position = m_tempPosition;
+	m_xmf3Look = m_tempLook;
+	m_xmf3Up = m_tempUp;
+	m_xmf3Right = m_tempRight;
+
+	RegenerateViewMatrix();
+	GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+}
+
+void CCamera::CameraOrthogonalize(XMFLOAT2 size)
+{
+	m_tempPosition = m_xmf3Position;
+	m_tempRight = m_xmf3Right;
+	m_tempUp = m_xmf3Up;
+	m_tempLook = m_xmf3Look;
+
+	SetPosition(XMFLOAT3(size.x, 5000, size.y));
+
+	m_xmf3Look = XMFLOAT3(0, -1, 0);
+	m_xmf3Right = XMFLOAT3(0, 0, 1);
+	m_xmf3Up = XMFLOAT3(1, 0, 0);
+	RegenerateViewMatrix();
+	m_xmf4x4Projection = Matrix4x4::OrthographicLH(size.x, size.y, 0.5f, 10000.0f);
+}
+
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
 {
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);

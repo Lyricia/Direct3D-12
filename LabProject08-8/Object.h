@@ -71,6 +71,8 @@ public:
 	ID3D12Resource *GetTexture(int nIndex) { return(m_ppd3dTextures[nIndex]); }
 	UINT GetTextureType() { return(m_nTextureType); }
 
+	ID3D12Resource *CreateTexture(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE *pd3dClearValue, UINT nIndex);
+
 	void ReleaseUploadBuffers();
 };
 
@@ -169,9 +171,11 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
+	void SetLook(XMFLOAT3 xmf3Look);
 	void SetLocalPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 	void SetLocalScale(float x, float y, float z);
+	void SetWorldPosition(XMFLOAT3 xmf3Position);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -228,6 +232,27 @@ private:
 public:
 	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
 	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
+
+	virtual void Animate(float fTimeElapsed);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class CMissle : public CGameObject
+{
+public:
+	CMissle(int nMeshes = 1);
+	virtual ~CMissle();
+
+private:
+	XMFLOAT3					m_xmf3Direction;
+	float						m_fSpeed;
+
+public:
+	void SetSpeed(float Speed) { m_fSpeed = Speed; }
+	void Setdirection(XMFLOAT3 Dir) { m_xmf3Direction = Dir; }
+	bool IsCollideWithTerrain(void* pContext);
 
 	virtual void Animate(float fTimeElapsed);
 };

@@ -88,6 +88,12 @@ void CTexture::LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
+ID3D12Resource *CTexture::CreateTexture(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE *pd3dClearValue, UINT nIndex)
+{
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, pd3dCommandList, nWidth, nHeight, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	return(m_ppd3dTextures[nIndex]);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CMaterial::CMaterial()
@@ -351,6 +357,13 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
 
+void CGameObject::SetLook(XMFLOAT3 xmf3Look)
+{
+	m_xmf4x4World._31 = xmf3Look.x;
+	m_xmf4x4World._32 = xmf3Look.y;
+	m_xmf4x4World._33 = xmf3Look.z;
+}
+
 void CGameObject::SetLocalPosition(XMFLOAT3 xmf3Position)
 {
 	XMMATRIX mtxTranslation = XMMatrixTranslation(xmf3Position.x, xmf3Position.y, xmf3Position.z);
@@ -365,6 +378,13 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::SetLocalScale(float x, float y, float z)
 {
+}
+
+void CGameObject::SetWorldPosition(XMFLOAT3 xmf3Position)
+{
+	m_xmf4x4World._41 = xmf3Position.x;
+	m_xmf4x4World._42 = xmf3Position.y;
+	m_xmf4x4World._43 = xmf3Position.z;
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -740,7 +760,7 @@ CGunshipHellicopter::CGunshipHellicopter(ID3D12Device *pd3dDevice, ID3D12Graphic
 	m_pHellfileMissileFrame = FindFrame(_T("Hellfire_Missile"));
 	if (m_pHellfileMissileFrame) m_pHellfileMissileFrame->m_bActive = false;
 
-	SetScale(2.0f, 2.0f, 2.0f);
+	SetScale(40.0f, 40.0f, 40.0f);
 	Rotate(0.0f, 180.0f, 0.0f);
 }
 
@@ -967,4 +987,30 @@ void CBillBoard::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * p
 			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, nInstances, d3dInstancingBufferView);
 		}
 	}
+}
+
+CMissle::CMissle(int nMeshes)
+{
+}
+
+CMissle::~CMissle()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool CMissle::IsCollideWithTerrain(void * pContext)
+{
+	CHeightMapTerrain *terrain = (CHeightMapTerrain*)pContext;
+	if (GetPosition().y < terrain->GetHeight(GetPosition().x, GetPosition().z) + 20
+		|| GetPosition().x < 0 || GetPosition().x > terrain->GetWidth()
+		|| GetPosition().z < 0 || GetPosition().z > terrain->GetLength())
+		return true;
+
+	return false;
+}
+
+void CMissle::Animate(float fTimeElapsed)
+{
+	SetWorldPosition(Vector3::Add(GetPosition(), Vector3::ScalarProduct(m_xmf3Direction, m_fSpeed, false)));
 }

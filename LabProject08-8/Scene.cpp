@@ -21,34 +21,24 @@ void CScene::BuildLightsAndMaterials()
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 
 	m_pLights->m_pLights[0].m_bEnable = true;
-	m_pLights->m_pLights[0].m_nType = POINT_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 100.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(130.0f, 30.0f, 30.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
+	m_pLights->m_pLights[0].m_fRange = 5000.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.58f, 0.58f, 0.58f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-100.0f, 20.0f, -5.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[0].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights->m_pLights[1].m_bEnable = true;
-	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 5000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.35f, 0.35f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.58f, 0.58f, 0.58f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-100.0f, 20.0f, -5.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[1].m_fFalloff = 8.0f;
-	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-
-	//m_pLights->m_pLights[2].m_bEnable = true;
-	//m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	//m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
-	//m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.75f, 0.75f, 0.75f, 1.0f);
-	//m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	//m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.1f, -0.1f, 0.0f);
 	//
 	//m_pLights->m_pLights[3].m_bEnable = true;
 	//m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
@@ -117,32 +107,29 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	XMFLOAT3 xmf3Scale(4.0f, 1.0f, 4.0f);
+	XMFLOAT3 xmf3Scale(4.0f, 2.0f, 4.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 #ifdef _WITH_TERRAIN_PARTITION
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Resource/Terrain/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 #else
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Resource/Terrain/HeightMap4.raw"), 2049, 2049, 2049, 2049, xmf3Scale, xmf4Color);
 #endif
-
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	
-	m_nObjects = 1;
+	m_pMissle = new CMissleShader();
+	m_pMissle->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pMissle->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
+
+	m_ppMissle = m_pMissle->GetObjectlist();
+	m_nMissles = m_pMissle->GetObjectAmount();
+
+	m_nObjects = 5;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	
-
-
 #ifdef _WITH_GUNSHIP_MODEL
-	m_ppObjects[0] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_ppObjects[0]->SetPosition(XMFLOAT3(0.0f, 0.0f, 50.0f));
-	//m_ppObjects[1] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_ppObjects[1]->SetPosition(XMFLOAT3(-30.0f, 5.0f, 30.0f));
-	//m_ppObjects[2] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_ppObjects[2]->SetPosition(XMFLOAT3(+30.0f, 0.0f, 20.0f));
-	//m_ppObjects[3] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_ppObjects[3]->SetPosition(XMFLOAT3(+40.0f, 10.0f, 50.0f));
-	//m_ppObjects[4] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_ppObjects[4]->SetPosition(XMFLOAT3(+40.0f, -10.0f, 30.0f));
+	for (int i = 0; i < m_nObjects; ++i) {
+		m_ppObjects[i] = new CGunshipHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetWorldPosition(XMFLOAT3(500.0f * 4, 200.f, 666.f * 4));
+	}
 #endif
 #ifdef _WITH_APACHE_MODEL
 	m_ppObjects[0] = new CApacheHellicopter(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -154,10 +141,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pBillBoard->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pBillBoard->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 
-	m_pMissle = new CMissleShader();
-	m_pMissle->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pMissle->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
-
+	m_pParticleBillBoard = new CParticleBillBoard();
+	m_pParticleBillBoard->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pParticleBillBoard->BuildObjects(pd3dDevice, pd3dCommandList);
+	
 	BuildLightsAndMaterials();
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -190,6 +177,7 @@ void CScene::ReleaseObjects()
 	if (m_pSkyBox) delete m_pSkyBox;
 	if (m_pMissle) delete m_pMissle;
 	if (m_pBillBoard) delete m_pBillBoard;
+	if (m_pParticleBillBoard) delete m_pParticleBillBoard;
 
 	if (m_pLights) delete m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
@@ -209,7 +197,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[7];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[9];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -249,11 +237,23 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[6].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[6].NumDescriptors = 6;
-	pd3dDescriptorRanges[6].BaseShaderRegister = 5; // t5 : Tree, Grass Texture
+	pd3dDescriptorRanges[6].BaseShaderRegister = 5; // t5~t11: Tree, Grass Texture
 	pd3dDescriptorRanges[6].RegisterSpace = 0;
 	pd3dDescriptorRanges[6].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
+	pd3dDescriptorRanges[7].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[7].NumDescriptors = 1;
+	pd3dDescriptorRanges[7].BaseShaderRegister = 11; // t11 : particle sprite
+	pd3dDescriptorRanges[7].RegisterSpace = 0;
+	pd3dDescriptorRanges[7].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	pd3dDescriptorRanges[8].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[8].NumDescriptors = 1;
+	pd3dDescriptorRanges[8].BaseShaderRegister = 12; // t12 : minimap
+	pd3dDescriptorRanges[8].RegisterSpace = 0;
+	pd3dDescriptorRanges[8].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[13];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Player
@@ -309,6 +309,16 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6]; // Tree Grass
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[11].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[7]; // Particle
+	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[8]; // minimap
+	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc;
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC));
@@ -394,6 +404,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		switch (wParam)
 		{
 		case VK_SPACE:
+			m_pMissle->ShootMissle(m_pPlayer->GetPosition(), m_pPlayer->GetLookVector(), 5);
 			break;
 		default:
 			break;
@@ -412,14 +423,46 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-
-	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Animate(fTimeElapsed);
-
+	for (int i = 0; i < m_nObjects; i++) 
+	{
+		m_ppObjects[i]->MoveForward(0.5f);
+		float h = m_pTerrain->GetHeight(m_ppObjects[i]->GetPosition().x, m_ppObjects[i]->GetPosition().z);
+		if (h > m_ppObjects[i]->GetPosition().y) 
+		{
+			m_ppObjects[i]->MoveForward(-1.f);
+			m_ppObjects[i]->Rotate(0, float(rand() % 180), 0);
+		}
+		m_ppObjects[i]->Animate(fTimeElapsed);
+		m_ppObjects[i]->UpdateTransform();
+	}
+	m_pMissle->AnimateObjects(fTimeElapsed);
+	m_pParticleBillBoard->AnimateObjects(fTimeElapsed);
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
+		m_pLights->m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+		m_pLights->m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+	}
+
+	for (int i = 0; i < m_nMissles; ++i) 
+	{
+		if (m_ppMissle[i]->IsCollideWithTerrain(m_pTerrain) && m_ppMissle[i]->m_bActive == true)
+		{
+			m_ppMissle[i]->SetSpeed(0);
+			m_ppMissle[i]->m_bActive = false;
+			m_pParticleBillBoard->ActivateParticle(m_ppMissle[i]->GetPosition());
+		}
+		for (int j = 0; j < m_nObjects; ++j) 
+		{
+			if (m_ppMissle[i]->m_bActive == true)
+			{
+				if (Vector3::Length(Vector3::Subtract(m_ppObjects[j]->GetPosition(), m_ppMissle[i]->GetPosition())) < 300)
+				{
+					m_ppMissle[i]->SetSpeed(0);
+					m_ppMissle[i]->m_bActive = false;
+					m_pParticleBillBoard->ActivateParticle(m_ppMissle[i]->GetPosition());
+				}
+			}
+		}
 	}
 }
 
@@ -432,22 +475,19 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dcbLightsGpuVirtualAddress); //Lights
-
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dcbLightsGpuVirtualAddress); //Lights
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pBillBoard) m_pBillBoard->Render(pd3dCommandList, pCamera);
+	if (m_pParticleBillBoard) m_pParticleBillBoard->Render(pd3dCommandList, pCamera);
 	if (m_pMissle) m_pMissle->Render(pd3dCommandList, pCamera);
-
-
-	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->UpdateTransform(NULL);
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Render(pd3dCommandList, pCamera);
-
 }
 

@@ -22,6 +22,7 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 	void CreateCommandQueueAndList();
+	void CreateSwapChainRenderTargetViews();
 
 	void OnResizeBackBuffers();
 
@@ -59,7 +60,9 @@ private:
 	ID3D12Resource				*m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
 	ID3D12DescriptorHeap		*m_pd3dRtvDescriptorHeap = NULL;
 	UINT						m_nRtvDescriptorIncrementSize;
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dRtvSwapChainBackBufferCPUHandles[m_nSwapChainBuffers];
 
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDepthStencilBufferCPUHandle;
 	ID3D12Resource				*m_pd3dDepthStencilBuffer = NULL;
 	ID3D12DescriptorHeap		*m_pd3dDsvDescriptorHeap = NULL;
 	UINT						m_nDsvDescriptorIncrementSize;
@@ -85,5 +88,11 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[50];
+
+	CMinimapShader				*m_pMinimapShader = NULL;
+
+	static const UINT				m_nRenderTargetBuffers = 2;
+	ID3D12Resource					*m_ppd3dRenderTargetBuffers[m_nRenderTargetBuffers];
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dRtvRenderTargetBufferCPUHandles[m_nRenderTargetBuffers];
 };
 

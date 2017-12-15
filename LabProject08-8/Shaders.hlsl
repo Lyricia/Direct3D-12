@@ -345,6 +345,7 @@ void GS_BillBoard(point VS_BILLBOARD_OUTPUT input[1], uint primitiveID : SV_Prim
     {
         output.positionW = pVertices[i].xyz;
         output.positionH = mul(mul(pVertices[i], gmtxView), gmtxProjection);
+        //output.positionH = mul(pVertices[i], gmtxProjection);
         output.normalW = vLook;
         output.uv = pUVs[i];
         output.primitiveID = primitiveID;
@@ -364,4 +365,158 @@ float4 PS_BillBoard(GS_BILLBOARD_OUTPUT input) : SV_Target
         discard;
 
     return (cColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+Texture2D gtxtParticleBillBoardTextures : register(t11);
+
+struct VS_PARTICLE_BILLBOARD_INPUT
+{
+    float3 position : POSITION;
+    float2 size : SIZE;
+    float2 spritepos : SPRITEPOSITION;
+};
+
+struct VS_PARTICLE_BILLBOARD_OUTPUT
+{
+    float3 position : POSITION;
+    float2 size : SIZE;
+    float2 spritepos : SPRITEPOSITION;
+};
+
+struct GS_PARTICLE_BILLBOARD_OUTPUT
+{
+    float4 positionH : SV_POSITION;
+    float3 positionW : POSITION;
+    float3 normalW : NORMAL;
+    float2 uv : TEXCOORD;
+    uint primitiveID : SV_PrimitiveID;
+};
+
+VS_PARTICLE_BILLBOARD_OUTPUT VS_ParticleBillBoard(VS_PARTICLE_BILLBOARD_INPUT input)
+{
+    VS_PARTICLE_BILLBOARD_OUTPUT output;
+
+    output.position = input.position;
+    output.size = input.size;
+    output.spritepos = input.spritepos;
+
+    return output;
+}
+
+[maxvertexcount(4)]
+void GS_ParticleBillBoard(point VS_PARTICLE_BILLBOARD_OUTPUT input[1], uint primitiveID : SV_PrimitiveID, inout TriangleStream<GS_PARTICLE_BILLBOARD_OUTPUT> outStream)
+{
+    float3 vUp = float3(0.0f, 1.0f, 0.0f);
+    float3 vLook = gvCameraPosition.xyz - input[0].position;
+    vLook = normalize(vLook);
+    float3 vRight = cross(vUp, vLook);
+    float fHalfW = input[0].size.x * 0.5f;
+    float fHalfH = input[0].size.y * 0.5f;
+
+    float4 pVertices[4];
+    pVertices[0] = float4(input[0].position + fHalfW * vRight - fHalfH * vUp, 1.0f);
+    pVertices[1] = float4(input[0].position + fHalfW * vRight + fHalfH * vUp, 1.0f);
+    pVertices[2] = float4(input[0].position - fHalfW * vRight - fHalfH * vUp, 1.0f);
+    pVertices[3] = float4(input[0].position - fHalfW * vRight + fHalfH * vUp, 1.0f);
+
+    //pUVs[0];
+    //pUVs[1];
+    //pUVs[2];
+    //pUVs[3];
+
+    float spritewidth = input[0].spritepos.x;
+    float spriteheight = input[0].spritepos.y;
+
+    float2 pUVs[4] =
+    {
+        float2(spritewidth * 0.125f, (spriteheight + 1) * 0.125f),
+        float2(spritewidth * 0.125f, spriteheight * 0.125f),
+        float2((spritewidth + 1) * 0.125f, (spriteheight + 1) * 0.125f),
+        float2((spritewidth + 1) * 0.125f, spriteheight * 0.125f)
+    };
+
+    GS_PARTICLE_BILLBOARD_OUTPUT output;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        output.positionW = pVertices[i].xyz;
+        output.positionH = mul(mul(pVertices[i], gmtxView), gmtxProjection);
+        output.normalW = vLook;
+        output.uv = pUVs[i];
+        output.primitiveID = primitiveID;
+        outStream.Append(output);
+    }
+}
+
+float4 PS_ParticleBillBoard(GS_PARTICLE_BILLBOARD_OUTPUT input) : SV_Target
+{
+    float4 cColor = gtxtParticleBillBoardTextures.Sample(gSamplerState, input.uv);
+
+    if (cColor.a < 0.2)
+        discard;
+
+    return (cColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+struct VS_MINIMAP_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
+
+Texture2D gtxtScreen : register(t1);
+Texture2D gtxtMinimap : register(t2);  
+
+VS_MINIMAP_OUTPUT VS_FullScreen(uint nVertexID : SV_VertexID)
+{
+    VS_MINIMAP_OUTPUT output;
+
+    if (nVertexID == 0)
+    {
+        output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.f, 0.f);
+    }
+    if (nVertexID == 1)
+    {
+        output.position = float4(+1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.f, 0.f);
+    }
+    if (nVertexID == 2)
+    {
+        output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.f, 1.f);
+    }
+    if (nVertexID == 3)
+    {
+        output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.f, 0.f);
+    }
+    if (nVertexID == 4)
+    {
+        output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.f, 1.f);
+    }
+    if (nVertexID == 5)
+    {
+        output.position = float4(-1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.f, 1.f);
+    }
+
+    return (output);
+}
+
+float4 PS_FullScreen(VS_MINIMAP_OUTPUT input) : SV_Target
+{
+    float3 cColor = gtxtScreen[int2(input.position.xy)].rgb;
+    return (float4(cColor, 1.0f));
+}
+
+float4 PS_Minimap(VS_MINIMAP_OUTPUT input) : SV_Target
+{
+    float3 cColor = gtxtMinimap[int2(input.position.xy)].rgb;
+    return (float4(cColor, 1.0f));
 }
