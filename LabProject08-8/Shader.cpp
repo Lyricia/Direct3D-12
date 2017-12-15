@@ -1268,9 +1268,10 @@ void CMinimapShader::CreateGraphicsRootSignature(ID3D12Device * pd3dDevice)
 
 void CMinimapShader::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera, int pipelineidx)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[pipelineidx]);
-
 	CShader::Render(pd3dCommandList, pCamera);
+
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[pipelineidx]);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 

@@ -89,13 +89,14 @@ void CCamera::CameraOrthogonalize(XMFLOAT2 size)
 	m_tempUp = m_xmf3Up;
 	m_tempLook = m_xmf3Look;
 
-	SetPosition(XMFLOAT3(size.x, 5000, size.y));
+	SetPosition(XMFLOAT3(size.x*0.5, 1000, size.y*0.5));
+	
 
 	m_xmf3Look = XMFLOAT3(0, -1, 0);
 	m_xmf3Right = XMFLOAT3(0, 0, 1);
 	m_xmf3Up = XMFLOAT3(1, 0, 0);
 	RegenerateViewMatrix();
-	m_xmf4x4Projection = Matrix4x4::OrthographicLH(size.x, size.y, 0.5f, 10000.0f);
+	m_xmf4x4Projection = Matrix4x4::OrthographicLH(size.x, size.y, 0.5f, 15000.0f);
 }
 
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)

@@ -611,19 +611,22 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dRtvRenderTargetBufferCPUHandles[0], pfClearColor, 0, NULL);
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dRtvRenderTargetBufferCPUHandles[1], pfClearColor, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDepthStencilBufferCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	
-	// render Gameworld
-	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvRenderTargetBufferCPUHandles[0], TRUE, &m_d3dDsvDepthStencilBufferCPUHandle);
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pPlayer->UpdateTransform(NULL);
-	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
-
-	hResult = m_pd3dCommandList->Close();
-	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-	WaitForGpuComplete();
-	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+	
+	//// render Gameworld
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvRenderTargetBufferCPUHandles[0], TRUE, &m_d3dDsvDepthStencilBufferCPUHandle);
+	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	//
+	//m_pScene->Render(m_pd3dCommandList, m_pCamera);
+	//m_pPlayer->UpdateTransform(NULL);
+	//m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	//
+	//
+	//hResult = m_pd3dCommandList->Close();
+	//m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	//WaitForGpuComplete();
+	//m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	// end of first render gameworld
 
 	// Render Minimap
@@ -631,37 +634,44 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvRenderTargetBufferCPUHandles[1], TRUE, &m_d3dDsvDepthStencilBufferCPUHandle);
 	
 	// Set Camera Orthogonal
-	m_pCamera->SetViewport(FRAME_BUFFER_WIDTH*0.60, FRAME_BUFFER_HEIGHT*0.60, FRAME_BUFFER_WIDTH*0.40, FRAME_BUFFER_HEIGHT*0.40, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pCamera->SetViewport(FRAME_BUFFER_WIDTH - 220, FRAME_BUFFER_HEIGHT - 220, 220, 220, 0.0f, 1.0f);
 	m_pCamera->CameraOrthogonalize(XMFLOAT2(m_pScene->GetTerrain()->GetWidth(), m_pScene->GetTerrain()->GetLength()));
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 
+	m_pScene->Render(m_pd3dCommandList, m_pCamera);
 	m_pPlayer->UpdateTransform(NULL);
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	// Revert Orthogonal
-	m_pCamera->RevertOrthogonal();
-	
+
 	m_pd3dCommandList->Close();
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	WaitForGpuComplete();
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	// end of render minimap
 
+	// Revert Orthogonal
+	m_pCamera->RevertOrthogonal();
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 
-	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dRenderTargetBuffers[0], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
+	//::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dRenderTargetBuffers[0], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
 	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dRenderTargetBuffers[1], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
 	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	
 	// Render on Render Target only Scene
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDepthStencilBufferCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex], Colors::Azure, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex], TRUE, &m_d3dDsvDepthStencilBufferCPUHandle);
 	
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pMinimapShader->Render(m_pd3dCommandList, m_pCamera, 0);		// 0 : full
 
+	m_pScene->Render(m_pd3dCommandList, m_pCamera);
+	m_pPlayer->UpdateTransform(NULL);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	//m_pMinimapShader->Render(m_pd3dCommandList, m_pCamera, 0);		// 0 : full
+	
 	hResult = m_pd3dCommandList->Close();
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	WaitForGpuComplete();
@@ -672,16 +682,11 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex], TRUE, &m_d3dDsvDepthStencilBufferCPUHandle);
 	m_pd3dCommandList->ClearDepthStencilView(m_d3dDsvDepthStencilBufferCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	
-	m_pCamera->SetViewport(FRAME_BUFFER_WIDTH*0.60, FRAME_BUFFER_HEIGHT*0.60, FRAME_BUFFER_WIDTH*0.40, FRAME_BUFFER_HEIGHT*0.40, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-
+	
+	m_pCamera->SetViewport(FRAME_BUFFER_WIDTH - 220, FRAME_BUFFER_HEIGHT - 220, 220, 220, 0.0f, 1.0f);
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapShader->Render(m_pd3dCommandList, m_pCamera, 1);		// 1 : minimap
 
-	m_pPlayer->UpdateTransform(NULL);
-	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-
-	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	
 	hResult = m_pd3dCommandList->Close();
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	WaitForGpuComplete();
